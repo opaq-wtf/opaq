@@ -52,7 +52,7 @@ export default function Home() {
 
   return (
     <>
-      <main className="relative h-screen w-screen overflow-hidden bg-black text-yellow-300">
+      <main className="relative h-screen w-screen overflow-hidden text-yellow-300">
         <div className="absolute inset-0 z-0">
           <Image
             fill

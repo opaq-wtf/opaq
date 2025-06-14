@@ -1,3 +1,7 @@
+// DO NOT TOUCH THIS FILE AT ANY COST!!!!!
+// NO MODIFICATIONS ARE TO BE DONE UNLESS THEY ARE DONE BY TEJA(SHOYO)
+
+import { decrypt } from "@/lib/session";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -24,27 +28,38 @@ export async function middleware(req: NextRequest) {
     },
   ).catch((e) => console.error("Log send failed: ", e));
 
-  const protectedRoutes = ["/profile"];
-  const publicPath = ["/", "/sign-up", "sign-in"];
   const currentPath = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutes.includes(currentPath);
-  const isPublicPath = publicPath.includes(currentPath);
 
-  const session = (await cookies()).get("accessToken")?.value;
+  const protectedRoutes = ["/dashboard"]; // Need to create the dashboard route
+  const publicRoutes = ["/", "/sign-in", "/sign-up"];
+
+  const normalizePath = currentPath.toLowerCase();
+  const isDynamicRoute = /^\/[a-zA-Z0-9._]+$/.test(normalizePath); //Path for profiles like /user /user123 /user_123 /user.123
+
+  const isProtectedRoute =
+    protectedRoutes.includes(currentPath) || isDynamicRoute;
+  const isPublicRoute = publicRoutes.includes(currentPath);
 
   if (isProtectedRoute) {
-    if (!session) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
+    const cookie = (await cookies()).get("session")?.value;
+    const session = await decrypt(cookie);
+
+    if (!isPublicRoute && !session?.userId) {
+      return NextResponse.redirect(new URL("/sign-in", req.nextUrl));
     }
-    return NextResponse.next();
-  }
-  if (isPublicPath) {
-    return NextResponse.next();
+
+    if (
+      isPublicRoute &&
+      session?.userId &&
+      !req.nextUrl.pathname.startsWith("/profile")
+    ) {
+      return NextResponse.redirect(new URL("/profile", req.nextUrl));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/log).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.svg|api/log).*)"],
 };

@@ -1,54 +1,55 @@
+// SIGN IN ROUTE LOGIC
+
 import { pool } from "@/lib/db/pool";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { signAccessToken, singRefreshToken } from "@/lib/auth/jwt";
-import { setAuthCookies } from "@/lib/auth/cookies";
+import { createSession } from "@/lib/session";
+
+interface SingInData {
+  identifier: string;
+  password: string;
+}
 
 export async function POST(req: NextRequest) {
+  const { identifier, password }: SingInData = await req.json();
+
   const client = await pool.connect();
 
   try {
-    const body = await req.json();
-    const { identifier, password } = body;
-
     const result = await client.query(
-      "SELECT id, username, password FROM users WHERE email = $1 OR username = $1 LIMIT 1;",
+      "SELECT * FROM users WHERE email = $1 OR username = $1 LIMIT 1;",
       [identifier],
     );
 
-    if (result.rows.length === 0) {
+    if (result.rows.length === 0 || null) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      password,
+      result.rows[0].password,
+    );
+
+    if (!passwordMatch) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Incorrect Password" },
         { status: 401 },
       );
     }
 
-    const user = result.rows[0];
+    const userId = result.rows[0].id;
+    const username = result.rows[0].username;
+    await createSession(userId);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return NextResponse.json(
-        { message: "Invalid Credentials" },
-        { status: 401 },
-      );
-    }
-
-    const accessToken = signAccessToken({ userId: user.userId });
-    const refreshToken = singRefreshToken({ userId: user.userId });
-
-    const res = NextResponse.json(
-      { message: "Login Successful" },
+    return NextResponse.json(
+      { message: "Sign In successful", username },
       { status: 200 },
     );
-    setAuthCookies(res, accessToken, refreshToken);
-    return res;
-  } catch (err) {
-    console.error("Login error: ", err);
+  } catch (error) {
+    console.log("Some issue occured: ", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: "Internal Server Error" },
       { status: 500 },
     );
-  } finally {
-    client.release();
   }
 }

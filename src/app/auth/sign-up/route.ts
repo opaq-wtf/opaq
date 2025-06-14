@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+// SIGN UP ROUTE LOGIC
+
+"use server";
+
 import { pool } from "@/lib/db/pool";
-import { v4 as uuidv4 } from "uuid";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import { v4 as uuid } from "uuid";
 
 interface SignUpData {
   full_name: string;
@@ -11,41 +15,36 @@ interface SignUpData {
 }
 
 export async function POST(req: NextRequest) {
+  const { full_name, email, username, password }: SignUpData = await req.json();
   const client = await pool.connect();
 
   try {
-    const body = await req.json();
-    const data: SignUpData = body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id = uuid();
+    const timeStamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
 
-    const uuid = uuidv4();
-    const id = uuid.split("-")[1];
-
-    const now = new Date().toISOString();
-
-    const hashedPassword = await bcrypt.hash(data.password, 10);
     const result = await client.query(
       "INSERT INTO users (id, full_name, email, username, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id;",
-      [id, data.full_name, data.email, data.username, hashedPassword, now],
+      [id, full_name, email, username, hashedPassword, timeStamp],
     );
 
-    const inserted_row = result.rows[0].id;
-    const success = inserted_row === id;
-
-    if (!success) {
+    if (!result.rows[0].id) {
       return NextResponse.json(
-        { message: "Could not sign up user." },
-        { status: 500 },
+        { message: "Unable to create user" },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { message: "Sign Up Successful!" },
+      { message: "Sign Up Successful" },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Could not reach the database: ", error);
+    console.log("Could not insert data: ", error);
     return NextResponse.json(
-      { message: "Unable to sign up user" },
+      { message: "Internal Server Error" },
       { status: 500 },
     );
   } finally {

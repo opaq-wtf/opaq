@@ -1,8 +1,7 @@
-import { Pool } from "pg";
-import dotenv from "dotenv";
+//CONNECTING TO POSTGRESDB
 
-dotenv.config();
+import { Pool } from "pg";
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.NEXT_DATABASE_URL,
 });

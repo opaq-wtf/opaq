@@ -1,39 +1,33 @@
+// DO NOT MAKE ANY MODIFICATIONS WITHUOT CONSULTING TEJA(SHOYO)
+
 "use client";
 
 import { z } from "zod";
-import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
-import debounce from "lodash.debounce";
 import { Toaster, toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useCallback, useEffect, useState } from "react";
+import axios from "axios";
 import { redirect } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import debounce from "lodash.debounce";
 
-const formSchema = z
-  .object({
-    full_name: z.string().min(1, { message: "This field is required" }),
-    email: z.string().email({ message: "Not a valid email" }),
-    username: z
-      .string()
-      .min(1, { message: "This field is required" })
-      .refine(
-        (value) => {
-          const isUsername = /^[a-zA-Z0-9._]+$/.test(value);
-          return isUsername;
-        },
-        { message: "Invalid type of username" },
-      ),
-    password: z.string().min(1, { message: "Password is required" }),
-    cnf_password: z
-      .string()
-      .min(1, { message: "Please enter password confirmation" }),
-  })
-  .refine((data) => data.password === data.cnf_password, {
-    message: "Passwords do not match",
-    path: ["cnf_password"],
-  });
+const formSchema = z.object({
+  full_name: z.string().min(1, { message: "This field is required" }),
+  email: z.string().email({ message: "Not a valid email" }),
+  username: z
+    .string()
+    .min(1, { message: "This field is required" })
+    .refine(
+      (value) => {
+        const isUsername = /^[a-z0-9._]+$/.test(value);
+        return isUsername;
+      },
+      { message: "Invalid type of username." },
+    ),
+  password: z.string().min(1, { message: "Password is required" }),
+});
 
 type SignUpForm = z.infer<typeof formSchema>;
 
@@ -48,7 +42,7 @@ export default function SignUp() {
   const [isUsername, setIsUsername] = useState<boolean | null>(null);
   const identifierValue = watch("username");
 
-  const checkUser = useCallback(
+  const availableUsername = useCallback(
     debounce(async (value: string) => {
       try {
         if (!value) return setIsUsername(null);
@@ -59,26 +53,58 @@ export default function SignUp() {
       } catch {
         setIsUsername(false);
       }
-    }, 1000),
+    }, 1500),
     [],
   );
 
   useEffect(() => {
-    checkUser(identifierValue);
-  }, [identifierValue, checkUser]);
+    availableUsername(identifierValue);
+  }, [identifierValue, availableUsername]);
 
   const onSubmit: SubmitHandler<SignUpForm> = async (data: SignUpForm) => {
     try {
-      const { full_name, email, username, password } = data;
-      const res = await axios.post("http://localhost:3000/auth/sign-up", {
-        full_name,
-        email,
-        username,
-        password,
-      });
+      const res = await axios.post("http://localhost:3000/auth/sign-up", data);
       if (res.status === 201) {
-        toast(res.data.message, {
-          description: "You will be redirected shortly.",
+        toast.success(res.data.message, {
+          description: "You will be redirected",
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+        setTimeout(() => redirect("/sign-in"), 2000);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error(
+          "Server error: ",
+          error.response.status,
+          error.response.data.message,
+        );
+        toast.error(`Error ${error.response.status}`, {
+          description: error.response.data.message || "Something went wrong",
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+      } else if (error.request) {
+        console.error("No response recieved: ", error.request);
+        toast.error("No response from the server.", {
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+      } else {
+        console.error("Unexpected error: ", error.message);
+        toast.error("Unexpected error occured.", {
           action: {
             label: "Close",
             onClick: () => {
@@ -87,31 +113,13 @@ export default function SignUp() {
           },
         });
       }
-      setTimeout(() => redirect("/sign-in"), 2000);
-    } catch (error: any) {
-      if (error.response) {
-        console.error(
-          "Server error: ",
-          error.reponse.status,
-          error.response.data,
-        );
-        toast(`Error ${error.response.status}`, {
-          description: error.response.data?.message || "Something went wrong",
-        });
-      } else if (error.request) {
-        console.error("No response recieved: ", error.request);
-        toast("No response from the server.");
-      } else {
-        console.error("Unexpected error: ", error.message);
-        toast("Unexpected error occured.");
-      }
     }
   };
 
   return (
     <>
       <Toaster theme="dark" />
-      <div className="bg-black text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
+      <div className="text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
         <Link href="/">
           <div className="dark:text-foreground font-semibold text-2xl tracking-tighter mx-auto flex items-center gap-2">
             <div>
@@ -139,7 +147,7 @@ export default function SignUp() {
             </div>
             <div className="p-6 pt-0">
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div>
+                <div className="mt-4">
                   <div>
                     <div className="group relative rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
                       <div className="flex justify-between">
@@ -205,13 +213,13 @@ export default function SignUp() {
                         ) : null}
                       </div>
                       <div className="flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-1 rounded-l-md dark:text-foreground sm:text-sm group-focus-within:text-white text-gray-400">
+                        <span className="inline-flex items-center pr-1 rounded-l-md dark:text-foreground sm:text-sm group-focus-within:text-white text-gray-400">
                           opaq.wtf/
                         </span>
                         <input
                           type="text"
                           {...register("username")}
-                          placeholder="[user123, user.123, user_123]"
+                          placeholder="user123"
                           autoComplete="off"
                           className="block w-full bg-transparent text-sm file:my-1 file:rounded-full file:border-0 file:bg-accent file:px-4 file:py-2 file:font-medium placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 sm:leading-7 dark:text-foreground "
                         />
@@ -248,29 +256,6 @@ export default function SignUp() {
                       </p>
                     )}
                   </div>
-
-                  <div className="mt-4">
-                    <div className="group relative rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                      <div className="flex justify-between">
-                        <label className="text-xs font-medium group-focus-within:text-white text-gray-400">
-                          Confirm Password
-                        </label>
-                      </div>
-                      <div className="flex items-center">
-                        <input
-                          type="password"
-                          {...register("cnf_password")}
-                          className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 focus:ring-teal-500 sm:leading-7 dark:text-foreground"
-                          placeholder="******"
-                        />
-                      </div>
-                    </div>
-                    {errors.cnf_password && (
-                      <p className="text-red-500 pl-1 mt-1">
-                        {errors.cnf_password.message}
-                      </p>
-                    )}
-                  </div>
                 </div>
                 {/* <div className="mt-4 flex items-center justify-between">
                   <label className="flex items-center gap-2">
@@ -290,9 +275,10 @@ export default function SignUp() {
                   </Link>
                   <button
                     className="font-semibold hover:bg-black hover:text-white hover:ring hover:ring-white transition duration-300 inline-flex items-center justify-center rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black h-10 px-4 py-2"
+                    disabled={isSubmitting}
                     type="submit"
                   >
-                    {isSubmitting ? "Singing Up" : "Sign Up"}
+                    {isSubmitting ? "Signing Up" : "Sign Up"}
                   </button>
                 </div>
               </form>

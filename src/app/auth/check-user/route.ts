@@ -1,12 +1,18 @@
+// CHECKING IF A CERTAIN username EXISTS OR NOT
+
 import { pool } from "@/lib/db/pool";
 import { NextRequest, NextResponse } from "next/server";
 
+interface UsernameData {
+  username: string;
+}
+
 export async function POST(req: NextRequest) {
+  const { username }: UsernameData = await req.json();
+
   const client = await pool.connect();
 
   try {
-    const { username } = await req.json();
-
     const result = await client.query(
       "SELECT username FROM users WHERE username = $1 LIMIT 1;",
       [username],
@@ -17,5 +23,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ exists: true }, { status: 200 });
-  } catch {}
+  } catch (error) {
+    console.log("Could not fetch data from database: ", error);
+    return NextResponse.json(
+      { message: "Internal Server Error." },
+      { status: 500 },
+    );
+  }
 }

@@ -1,15 +1,15 @@
+// DO NOT MAKE ANY MODIFICATIONS WITHUOT CONSULTING TEJA(SHOYO)
+
 "use client";
 
-import axios from "axios";
 import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
-import debounce from "lodash.debounce";
 import { Toaster, toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useCallback, useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   identifier: z
@@ -18,12 +18,14 @@ const formSchema = z.object({
     .refine(
       (value) => {
         const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-        const isUsername = /^[a-zA-Z0-9._]+$/.test(value);
+        const isUsername = /^[a-z0-9._]+$/.test(value);
         return isEmail || isUsername;
       },
-      { message: "Enter a valid username or email" },
+      {
+        message: "Enter a valid username or email",
+      },
     ),
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z.string().min(1, { message: "This field is required" }),
 });
 
 type SignInForm = z.infer<typeof formSchema>;
@@ -32,40 +34,58 @@ export default function SignIn() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<SignInForm>({ resolver: zodResolver(formSchema) });
 
-  const [isValidIdentifier, setIsValidIdentifier] = useState<boolean | null>(
-    null,
-  );
-  const identifierValue = watch("identifier");
-
-  const checkUser = useCallback(
-    debounce(async (value: string) => {
-      try {
-        if (!value) return setIsValidIdentifier(null);
-        const res = await axios.post("http://localhost:3000/auth/is-user", {
-          identifier: value,
-        });
-        setIsValidIdentifier(res.data.exists);
-      } catch {
-        setIsValidIdentifier(false);
-      }
-    }, 1000),
-    [],
-  );
-
-  useEffect(() => {
-    checkUser(identifierValue);
-  }, [identifierValue, checkUser]);
-
+  const router = useRouter();
   const onSubmit: SubmitHandler<SignInForm> = async (data: SignInForm) => {
     try {
       const res = await axios.post("http://localhost:3000/auth/sign-in", data);
+      const username = res.data.username;
       if (res.status === 200) {
-        toast(res.data.message, {
-          description: "You will be redirected shortly.",
+        toast.success(res.data.message, {
+          description: "Redirecting you to your profile",
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+        setTimeout(() => {
+          router.push(`/${username}`);
+        }, 1500);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error(
+          "Server error",
+          error.response.status,
+          error.response.data.message,
+        );
+        toast.error(error.response.data.message, {
+          description:
+            `Error ${error.response.status}` || "Something went wrong",
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+      } else if (error.request) {
+        console.error("No response recieved: ", error.request);
+        toast.error("No response from the server.", {
+          action: {
+            label: "Close",
+            onClick: () => {
+              return;
+            },
+          },
+        });
+      } else {
+        console.error("Unexpected error: ", error.message);
+        toast.error("Unexpected error occured.", {
           action: {
             label: "Close",
             onClick: () => {
@@ -74,31 +94,13 @@ export default function SignIn() {
           },
         });
       }
-      setTimeout(() => redirect("/profile"), 2000);
-    } catch (error: any) {
-      if (error.response) {
-        console.error(
-          "Server error: ",
-          error.response.status,
-          error.response.data,
-        );
-        toast(`Error ${error.response.status}`, {
-          description: error.response.data?.message || "Something went wrong",
-        });
-      } else if (error.request) {
-        console.error("No response recieved: ", error.request);
-        toast("No response from the server.");
-      } else {
-        console.error("Unexpected error: ", error.message);
-        toast("Unexpected error occured.");
-      }
     }
   };
 
   return (
     <>
       <Toaster theme="dark" />
-      <div className="bg-black text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
+      <div className="text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
         <Link href="/">
           <div className="dark:text-foreground font-semibold text-2xl tracking-tighter mx-auto flex items-center gap-2">
             <div>
@@ -133,20 +135,11 @@ export default function SignIn() {
                         <label className="text-xs font-medium group-focus-within:text-white text-gray-400">
                           Username or Email
                         </label>
-                        {isValidIdentifier === true ? (
-                          <div className="absolute right-3 translate-y-2">
-                            ✅
-                          </div>
-                        ) : isValidIdentifier === false ? (
-                          <div className="absolute right-3 translate-y-2 bg-red-200 border border-red-400 rounded-full ">
-                            ❌
-                          </div>
-                        ) : null}
                       </div>
                       <input
                         type="text"
                         {...register("identifier")}
-                        placeholder="[user123, user.123, user_123] or user@mail.com"
+                        placeholder="user123 or user@mail.com"
                         autoComplete="off"
                         className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 file:rounded-full file:border-0 file:bg-accent file:px-4 file:py-2 file:font-medium placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 sm:leading-7 dark:text-foreground"
                       />
@@ -198,11 +191,13 @@ export default function SignIn() {
                   <Link
                     className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:ring hover:ring-white h-10 px-4 py-2 duration-200 hover:bg-black"
                     href="/sign-up"
+                    aria-disabled={isSubmitting}
                   >
-                    Register
+                    Sign Up
                   </Link>
                   <button
                     className="font-semibold hover:bg-black hover:text-white hover:ring hover:ring-white transition duration-300 inline-flex items-center justify-center rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black h-10 px-4 py-2"
+                    disabled={isSubmitting}
                     type="submit"
                   >
                     {isSubmitting ? "Singing In" : "Sign In"}

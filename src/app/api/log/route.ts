@@ -1,3 +1,5 @@
+// THIS FILE IS FOR CREATING LOGS TO CHECK WHICH END-POINT IS BEING HIT (MOSTLY FOR DEBUGGING PROCESS)
+
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
