@@ -10,8 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
 import { redirect } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import debounce from "lodash.debounce";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   full_name: z.string().min(1, { message: "This field is required" }),
@@ -40,26 +39,26 @@ export default function SignUp() {
   } = useForm<SignUpForm>({ resolver: zodResolver(formSchema) });
 
   const [isUsername, setIsUsername] = useState<boolean | null>(null);
-  const identifierValue = watch("username");
+  const username = watch('username');
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (!username) {
+        setIsUsername(null);
+        return;
+      }
 
-  const availableUsername = useCallback(
-    debounce(async (value: string) => {
       try {
-        if (!value) return setIsUsername(null);
-        const res = await axios.post("http://localhost:3000/auth/check-user", {
-          username: value,
+        const res = await axios.post('http://localhost:3000/auth/check-user', {
+          username
         });
         setIsUsername(res.data.exists);
       } catch {
         setIsUsername(false);
       }
-    }, 1500),
-    [],
-  );
+    }, 1500);
 
-  useEffect(() => {
-    availableUsername(identifierValue);
-  }, [identifierValue, availableUsername]);
+    return () => clearTimeout(handler);
+  }, [username]);
 
   const onSubmit: SubmitHandler<SignUpForm> = async (data: SignUpForm) => {
     try {
