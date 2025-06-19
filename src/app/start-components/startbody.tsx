@@ -2,31 +2,28 @@ export default function StartBody() {
   return (
     <div
       style={{
-        position: "fixed", // changed from relative to fixed
-        top: 0,
-        left: 0,
-        width: "100vw", // ensure full viewport width
-        height: "100vh", // ensure full viewport height
-        minHeight: "100vh",
-        backgroundImage: "url('https://forcdn.pages.dev/assets/retro.png')",
+        minHeight: "0", // allow shrinking if needed
+        backgroundImage: "url('https://forcdn.pages.dev/assets/retro.png')", // Added bg image
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         fontFamily: "'Kanit', sans-serif",
         zIndex: 0,
       }}
-      className="fixed inset-0"
+      className="w-full relative flex-1 flex items-center justify-center bg-gray-900 text-white"
     >
+      {/* Black translucent frozen glass overlay */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg backdrop-saturate-150 z-0 pointer-events-none" />
       {/* Translucent blurred glass overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none z-0" />
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-none z-0" />
-      <section className="w-full h-full flex items-center justify-center relative z-10">
-        <div className="mx-auto max-w-6xl px-8 py-16 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+      
+      <section className="w-full flex items-center justify-center relative z-10">
+        <div className="mx-auto max-w-6xl px-8 py-2 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
             <div className="md:col-span-2 flex flex-col justify-center">
               <div className="max-w-2xl">
-                <h1 className="text-6xl font-bold text-white sm:text-4xl">
-                  Open Playground for <br />Advanced Quests
+                <h1 className="text-6xl sm:text-2xl lg:text-6xl font-bold text-white">
+                  Open Playground for <br />
+                  Advanced Quests
                 </h1>
                 <p className="mt-6 text-lg text-gray-200">
                   Playground for misfits, quests, and more. Join the adventure!
@@ -46,10 +43,10 @@ export default function StartBody() {
                 </button>
               </div>
             </div>
-            <div className="md:col-span-1 flex justify-center">
+            <div className="md:col-span-1 flex justify-center relative">
               <img
                 src="https://forcdn.pages.dev/assets/Eyes.gif"
-                className="rounded-lg shadow-lg max-h-screen"
+                className="rounded-lg shadow-lg max-h-96"
                 alt="Animated eyes"
                 style={{ display: "block" }}
               />

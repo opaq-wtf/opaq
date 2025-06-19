@@ -57,7 +57,7 @@ export default function StartNavbar() {
             <ul className="flex flex-col gap-6 text-lg">
               <li>
                 <a
-                  className="text-gray-900 dark:text-white hover:text-gray-500/75 dark:hover:text-white/75 transition"
+                  className="text-gray-900  hover:text-gray-500/75  transition"
                   href="#"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -127,7 +127,7 @@ export default function StartNavbar() {
               <ul className="flex items-center gap-6 text-sm">
                 <li>
                   <a
-                    className="text-white transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
+                    className="text-white transition  hover:text-gray-900  hover:bg-white rounded-full p-4"
                     href="#"
                   >
                     About
@@ -135,7 +135,7 @@ export default function StartNavbar() {
                 </li>
                 <li>
                   <a
-                    className="text-white transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
+                    className="text-white transition  hover:text-gray-900  hover:bg-white rounded-full p-4"
                     href="#"
                   >
                     Guidelines
@@ -143,7 +143,7 @@ export default function StartNavbar() {
                 </li>
                 <li>
                   <a
-                    className="text-white transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
+                    className="text-white transition hover:text-gray-900  hover:bg-white rounded-full p-4 "
                     href="#"
                   >
                     Reach
@@ -154,20 +154,22 @@ export default function StartNavbar() {
             {/* Button (hidden on sm/md) */}
             <div className="hidden lg:flex items-center gap-4">
               <a
-                className="rounded-full bg-white px-5 py-2.5 text-md font-medium text-black shadow-sm hover:bg-black hover:text-white transition ease-in-out duration-300 flex items-center gap-2"
-                href="#"
+              className="rounded-full bg-white px-5 py-2.5 text-md font-medium text-black shadow-sm hover:bg-transparent border-2 border-white hover:text-white transition ease-in-out duration-300 flex justify-center items-center gap-2"
+              href="#"
               >
+              <span className="flex items-center gap-2 w-full justify-center">
                 Start Pitching
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
+              </span>
               </a>
             </div>
           </div>
