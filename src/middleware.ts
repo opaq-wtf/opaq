@@ -30,8 +30,8 @@ export async function middleware(req: NextRequest) {
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/dashboard"]; // Need to create the dashboard route
-  const publicRoutes = ["/", "/sign-in", "/sign-up"];
+  const protectedRoutes = ["/dashboard", '/home']; // Need to create the dashboard route
+  const publicRoutes = ["/", "/sign-in", "/sign-up", '/start'];
 
   const normalizePath = currentPath.toLowerCase();
   const isDynamicRoute = /^\/[a-zA-Z0-9._]+$/.test(normalizePath); //Path for profiles like /user /user123 /user_123 /user.123
@@ -45,15 +45,15 @@ export async function middleware(req: NextRequest) {
     const session = await decrypt(cookie);
 
     if (!isPublicRoute && !session?.userId) {
-      return NextResponse.redirect(new URL("/sign-in", req.nextUrl));
+      return NextResponse.redirect(new URL("/start", req.nextUrl));
     }
 
     if (
       isPublicRoute &&
       session?.userId &&
-      !req.nextUrl.pathname.startsWith("/profile")
+      !req.nextUrl.pathname.startsWith("/home")
     ) {
-      return NextResponse.redirect(new URL("/profile", req.nextUrl));
+      return NextResponse.redirect(new URL("/home", req.nextUrl));
     }
   }
 
@@ -61,5 +61,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.svg|api/log).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.svg|api/log|retro.gif).*)"],
 };
