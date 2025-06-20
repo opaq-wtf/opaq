@@ -1,3 +1,6 @@
+"use client";
+import React from "react";
+
 export default function StartBody() {
   return (
     <div
@@ -21,12 +24,17 @@ export default function StartBody() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
             <div className="md:col-span-2 flex flex-col justify-center">
               <div className="max-w-2xl">
-                <h1 className="text-6xl sm:text-2xl lg:text-6xl font-bold text-white">
-                  Open Playground for <br />
-                  Advance Quests
+                <h1 className="text-6xl sm:text-2xl md:text-4xl lg:text-6xl font-bold text-white flex flex-wrap gap-x-1 items-center">
+                    <span className="inline-block transition-all duration-300 ease-in-out hover:scale-108 font-bold group relative">
+                    Open Playground for
+                    </span>
+                    <span className="inline-block" style={{ minWidth: "0.8em" }} />
+                    <span className="inline-block transition-all duration-300 ease-in-out hover:scale-110">
+                    Advance Quests
+                    </span>
                 </h1>
                 <p className="my-6 text-2xl text-gray-200">
-                  Hack Till It Hurts. Your playground to break things, build better, and conquer quests.
+                  Hack Till It Hertz. Your playground to break things, build better, and conquer quests.
                 </p>
                 {/* Start Pitching Button */}
                 <a
@@ -37,18 +45,18 @@ export default function StartBody() {
                 >
                   Start Pitching
                   <span aria-hidden="true" style={{ display: "inline-block", marginLeft: "0.5em" }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="4" y1="12" x2="20" y2="12" />
-                    <polyline points="14 6 20 12 14 18" />
-                  </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="4" y1="12" x2="20" y2="12" />
+                      <polyline points="14 6 20 12 14 18" />
+                    </svg>
                   </span>
                 </a>
               </div>
             </div>
             <div className="md:col-span-1 flex justify-center py-2 relative">
               <img
-                src="https://forcdn.pages.dev/assets/Eyes.gif"
-                className="rounded-lg shadow-lg max-h-96"
+                src="https://forcdn.pages.dev/assets/eyes-grey.gif"
+                className="rounded-xl shadow-lg max-h-96"
                 alt="Animated eyes"
                 style={{ display: "block" }}
               />
