@@ -13,7 +13,7 @@ interface Users {
   username: string;
 }
 
-export default function Profile({ params }: { params: { username: string } }) {
+export default function Profile() {
   const { username } = useParams() as { username: string };
   const [users, setUsers] = useState<Users | []>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export default function Profile({ params }: { params: { username: string } }) {
     }
 
     fetchUsers();
-  }, []);
+  }, [username]);
 
   return (
     <div className="p-6">
