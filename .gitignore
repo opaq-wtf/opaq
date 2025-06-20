@@ -47,3 +47,5 @@ access.log
 
 # db migration files
 /src/lib/db/migrations
+
+bun.lock*

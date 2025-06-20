@@ -77,9 +77,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const now = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-    });
+    const now = new Date();
     const id = uuid();
 
     const result = await db.insert(users).values({
