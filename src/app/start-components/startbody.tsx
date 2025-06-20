@@ -13,7 +13,7 @@ export default function StartBody() {
       className="w-full relative flex-1 flex items-center justify-center bg-gray-900 text-white"
     >
       {/* Black translucent frozen glass overlay */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg backdrop-saturate-150 z-0 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-lg backdrop-saturate-150 z-0 pointer-events-none" />
       {/* Translucent blurred glass overlay */}
       
       <section className="w-full flex items-center justify-center relative z-10">
@@ -23,27 +23,29 @@ export default function StartBody() {
               <div className="max-w-2xl">
                 <h1 className="text-6xl sm:text-2xl lg:text-6xl font-bold text-white">
                   Open Playground for <br />
-                  Advanced Quests
+                  Advance Quests
                 </h1>
-                <p className="mt-6 text-lg text-gray-200">
-                  Playground for misfits, quests, and more. Join the adventure!
+                <p className="my-6 text-2xl text-gray-200">
+                  Hack Till It Hurts. Your playground to break things, build better, and conquer quests.
                 </p>
                 {/* Start Pitching Button */}
-                <button
-                  className="mt-8 px-8 py-3 rounded-full border-2 border-white hover:bg-white text-white hover:text-black font-semibold text-lg shadow transition flex items-center gap-2"
-                  type="button"
+                <a
+                  href="#"
+                  className="mt-6 inline-flex px-8 py-2 rounded-full border-2 border-white hover:bg-white text-white hover:text-black font-semibold text-lg shadow transition items-center gap-2 w-auto"
+                  role="button"
+                  style={{ width: "auto" }}
                 >
                   Start Pitching
                   <span aria-hidden="true" style={{ display: "inline-block", marginLeft: "0.5em" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="4" y1="12" x2="20" y2="12" />
-                      <polyline points="14 6 20 12 14 18" />
-                    </svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <polyline points="14 6 20 12 14 18" />
+                  </svg>
                   </span>
-                </button>
+                </a>
               </div>
             </div>
-            <div className="md:col-span-1 flex justify-center relative">
+            <div className="md:col-span-1 flex justify-center py-2 relative">
               <img
                 src="https://forcdn.pages.dev/assets/Eyes.gif"
                 className="rounded-lg shadow-lg max-h-96"

@@ -14,7 +14,8 @@ export default function Home() {
             }}
         >
             {/* Blur overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-lg backdrop-saturate-150 z-0 pointer-events-none" />
+            
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-lg backdrop-saturate-150 z-0 pointer-events-none" />
             {/* Ensure StartNavbar does not use browser-only APIs or non-deterministic values during SSR */}
             <div className="relative z-10 flex flex-col min-h-screen">
                 <StartNavbar />

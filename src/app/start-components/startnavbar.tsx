@@ -82,30 +82,30 @@ export default function StartNavbar() {
                   Reach
                 </a>
               </li>
+              <li>
+                <a
+                  className="rounded-full bg-black px-6 py-3 text-lg font-medium text-white shadow-sm hover:bg-gray-800 transition flex items-center gap-2 justify-center mt-2"
+                  href="#"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  Start Pitching
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </li>
             </ul>
           </nav>
-          <div className="mt-8">
-            <a
-              className="rounded-full bg-black px-6 py-3 text-lg font-medium text-white shadow-sm hover:bg-gray-800 transition flex items-center gap-2 justify-center"
-              href="#"
-              onClick={() => setSidebarOpen(false)}
-            >
-              Start Pitching
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
         </div>
       </aside>
-      <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded-full shadow-lg backdrop-blur-md border border-2 border-gray-100 px-8 py-2 w-[98vw] max-w-6xl mx-auto">
+      <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded-full shadow-lg backdrop-blur-md  border-2 border-gray-100 px-8 py-2 w-[98vw] max-w-6xl mx-auto">
         <div className="flex h-16 items-center justify-between relative">
           {/* Left padding for pill effect */}
           <div className="w-4 sm:w-8" />
@@ -124,10 +124,10 @@ export default function StartNavbar() {
             </a>
             {/* Nav (hidden on sm/md) */}
             <nav aria-label="Global" className="hidden lg:block">
-              <ul className="flex items-center gap-6 text-sm">
+              <ul className="flex items-center gap-6 text-md">
                 <li>
                   <a
-                    className="text-white transition  hover:text-gray-900  hover:bg-white rounded-full p-4"
+                    className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="#"
                   >
                     About
@@ -135,7 +135,7 @@ export default function StartNavbar() {
                 </li>
                 <li>
                   <a
-                    className="text-white transition  hover:text-gray-900  hover:bg-white rounded-full p-4"
+                    className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="#"
                   >
                     Guidelines
@@ -143,7 +143,7 @@ export default function StartNavbar() {
                 </li>
                 <li>
                   <a
-                    className="text-white transition hover:text-gray-900  hover:bg-white rounded-full p-4 "
+                    className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="#"
                   >
                     Reach
