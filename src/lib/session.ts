@@ -28,7 +28,8 @@ export async function decrypt(session: any) {
       algorithms: ["HS256"],
     });
     return payload;
-  } catch {
+  } catch (error) {
+    console.error("Session decryption failed:", error);
     return null;
   }
 }

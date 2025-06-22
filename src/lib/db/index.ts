@@ -17,5 +17,5 @@ export const db = drizzle(client, {
         users,
         emailVerification,
     },
-    logger: true
+    logger: false
 });

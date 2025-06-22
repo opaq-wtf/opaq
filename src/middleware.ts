@@ -31,7 +31,7 @@ export async function middleware(req: NextRequest) {
   const currentPath = req.nextUrl.pathname;
 
   const protectedRoutes = ["/dashboard", '/home']; // Need to create the dashboard route
-  const publicRoutes = ["/", "/sign-in", "/sign-up", '/start', '/about'];
+  const publicRoutes = ["/", "/sign-in", "/sign-up", '/start', '/about', '/auth/verify-email'];
 
   const normalizePath = currentPath.toLowerCase();
   const isDynamicRoute = /^\/[a-zA-Z0-9._]+$/.test(normalizePath); //Path for profiles like /user /user123 /user_123 /user.123

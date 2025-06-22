@@ -1,7 +1,4 @@
 import type { Config } from 'drizzle-kit';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 // Validate connection string
 const connectionString = process.env.NEXT_DATABASE_URL;
@@ -16,4 +13,6 @@ export default {
     url: connectionString,
     verbose: true,
     strict: true,
+    tablesFilter: ['!pg_stat_statements', '!pg_stat_statements_info'],
+
 } as Config;
