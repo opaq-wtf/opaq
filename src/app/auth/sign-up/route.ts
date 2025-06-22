@@ -22,15 +22,18 @@ export async function POST(req: NextRequest) {
     const now = new Date();
     const id = uuid();
 
-    const result = await db.insert(users).values({
-      id,
-      fullName: full_name,
-      email,
-      username,
-      password: hashedPassword,
-      createdAt: now,
-      updatedAt: now
-    }).returning({ id: users.id });
+    const result = await db
+      .insert(users)
+      .values({
+        id,
+        fullName: full_name,
+        email,
+        username,
+        password: hashedPassword,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: users.id });
 
     if (!result[0]?.id) {
       return NextResponse.json(

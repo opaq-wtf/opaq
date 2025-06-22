@@ -25,7 +25,8 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     user: async (_: any, { id }: { id: string }) => {
-      const result = await db.select()
+      const result = await db
+        .select()
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
@@ -34,11 +35,12 @@ const resolvers = {
     },
 
     userByUsername: async (_: any, { username }: { username: string }) => {
-      const result = await db.select()
+      const result = await db
+        .select()
         .from(users)
         .where(eq(users.username, username))
         .limit(1);
-      
+
       const user = result[0];
       if (!user) {
         return null;

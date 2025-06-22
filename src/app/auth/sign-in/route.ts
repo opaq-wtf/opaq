@@ -14,12 +14,10 @@ export async function POST(req: NextRequest) {
   const { identifier, password }: SignInData = await req.json();
 
   try {
-    const result = await db.select()
+    const result = await db
+      .select()
       .from(users)
-      .where(or(
-        eq(users.email, identifier),
-        eq(users.username, identifier)
-      ))
+      .where(or(eq(users.email, identifier), eq(users.username, identifier)))
       .limit(1);
 
     if (result.length === 0) {

@@ -20,7 +20,7 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchUsers() {      
+    async function fetchUsers() {
       try {
         const res = await axios.post(
           "http://localhost:3000/api/graphql",
@@ -45,7 +45,7 @@ export default function Profile() {
             },
           },
         );
-        
+
         if (res.data.errors) {
           throw new Error(res.data.errors[0].message);
         }

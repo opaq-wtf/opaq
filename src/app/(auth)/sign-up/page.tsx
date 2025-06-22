@@ -38,7 +38,7 @@ export default function SignUp() {
   } = useForm<SignUpForm>({ resolver: zodResolver(formSchema) });
 
   const [isUsername, setIsUsername] = useState<boolean | null>(null);
-  const username = watch('username');
+  const username = watch("username");
   useEffect(() => {
     const handler = setTimeout(async () => {
       if (!username) {
@@ -47,8 +47,8 @@ export default function SignUp() {
       }
 
       try {
-        const res = await axios.post('http://localhost:3000/auth/check-user', {
-          username
+        const res = await axios.post("http://localhost:3000/auth/check-user", {
+          username,
         });
         setIsUsername(res.data.exists);
       } catch {
@@ -63,7 +63,7 @@ export default function SignUp() {
     try {
       const res = await axios.post("http://localhost:3000/auth/sign-up", data);
       if (res.status === 201) {
-        toast.success('Please verify your mail.', {
+        toast.success("Please verify your mail.", {
           description: res.data.message,
           action: {
             label: "Close",
