@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { DiscussionSection } from '@/app/(protected)/artwall/post/(discussion-components)/DiscussionSection';
 import {
   ArrowLeft,
   Heart,
@@ -57,6 +58,7 @@ export default function PostDetailPage() {
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<{ id: string; username: string } | null>(null);
   const [interaction, setInteraction] = useState<PostInteraction>({
     liked: false,
     saved: false,
@@ -134,6 +136,22 @@ export default function PostDetailPage() {
       const data = await response.json();
       setPost(data.post);
       setStartTime(Date.now()); // Record when user started viewing the post
+
+      // Fetch current user - this is a simple approach
+      // In a real app, you'd get this from your auth context/provider
+      try {
+        // For now, we'll extract user ID from the session or make an API call
+        // This is a placeholder - you'll need to implement based on your auth system
+        const userResponse = await fetch('/api/auth/me');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setCurrentUser({ id: userData.id, username: userData.username });
+        }
+      } catch (userError) {
+        console.warn('Could not fetch current user:', userError);
+        // Set a fallback or handle gracefully
+        setCurrentUser(null);
+      }
 
       // Fetch interaction data
       const interactionResponse = await fetch(`/api/interactions?post_id=${postId}`);
@@ -612,6 +630,15 @@ export default function PostDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Discussions Section */}
+        <div className="mt-8">
+          <DiscussionSection
+            postId={postId}
+            postAuthorId={post.user_id}
+            currentUserId={currentUser?.id}
+          />
+        </div>
       </main>
 
       {/* Custom styles for post content */}
