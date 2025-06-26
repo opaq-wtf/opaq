@@ -1,4 +1,4 @@
-import { getUser } from "@/app/data/user";
+import { getUser, getUserOptional } from "@/app/data/user";
 import MongoConnect from "@/lib/mongodb/lib/mongoose";
 import posts from "@/lib/mongodb/model/posts";
 import { NextRequest, NextResponse } from "next/server";
@@ -6,21 +6,34 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema/user";
 import { eq } from "drizzle-orm";
 
+interface Post {
+    id: string;
+    user_id: string;
+    title: string;
+    content: string;
+    labels: string[];
+    status: 'Draft' | 'Published';
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export async function GET(
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await MongoConnect();
-        const { id } = params;
+        const { id } = await params;    
 
-        const post = await posts.findOne({ id }).lean();
+        const post = await posts.findOne({ id }).lean() as unknown as Post;
 
         if (!post) {
             return NextResponse.json({ message: 'Post not found' }, { status: 404 });
         }
 
         // Only return published posts or drafts owned by the current user
-        const user = await getUser();
+        const user = await getUserOptional();
+
         if (post.status === 'Draft' && (!user || post.user_id !== user.id)) {
             return NextResponse.json({ message: 'Post not found' }, { status: 404 });
         }
@@ -73,11 +86,11 @@ export async function GET(
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await MongoConnect();
-        const { id } = params;
+        const { id } = await params;
         const { title, content, labels, status } = await req.json();
 
         const user = await getUser();
@@ -85,7 +98,7 @@ export async function PUT(
             return NextResponse.json({ message: 'User authentication required.' }, { status: 401 });
         }
 
-        const post = await posts.findOne({ id });
+        const post = await posts.findOne({ id }) as Post;
         if (!post) {
             return NextResponse.json({ message: 'Post not found' }, { status: 404 });
         }
@@ -120,18 +133,18 @@ export async function PUT(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await MongoConnect();
-        const { id } = params;
+        const { id } = await params;
 
         const user = await getUser();
         if (!user || !user.id) {
             return NextResponse.json({ message: 'User authentication required.' }, { status: 401 });
         }
 
-        const post = await posts.findOne({ id });
+        const post = await posts.findOne({ id }) as Post;
         if (!post) {
             return NextResponse.json({ message: 'Post not found' }, { status: 404 });
         }

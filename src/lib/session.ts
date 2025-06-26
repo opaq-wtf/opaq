@@ -59,3 +59,9 @@ export async function deleteSession() {
   (await cookies()).delete(cookie.name);
   redirect("/sign-in");
 }
+
+export async function getSession() {
+  const seshcookie = (await cookies()).get(cookie.name)?.value;
+  const session = await decrypt(seshcookie);
+  return session?.userId ? { userId: session.userId } : null;
+}
