@@ -43,7 +43,7 @@ export default function StartBody() {
                 </p>
                 {/* Start Pitching Button */}
                 <a
-                  href="#"
+                  href="/sign-in"
                   className="mt-6 inline-flex px-8 py-2 rounded-full border-2 border-white hover:bg-white text-white hover:text-black font-semibold text-lg shadow transition items-center gap-2 w-auto"
                   role="button"
                   style={{ width: "auto" }}

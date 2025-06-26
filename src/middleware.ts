@@ -30,15 +30,21 @@ export async function middleware(req: NextRequest) {
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/dashboard", "/home"]; // Need to create the dashboard route
+  const protectedRoutes = [, "/home"]; // Need to create the dashboard route
   const publicRoutes = [
     "/",
     "/sign-in",
     "/sign-up",
     "/start",
     "/about",
-    "/auth/verify-email",
-    '/api/posts',
+    "/guidelines",
+    "/reach",
+    "/wallet",
+    "/home",
+    "/bloom",
+    "/dashboard",
+    '/artwall/upload',
+    "/artwall",
   ];
 
   const normalizePath = currentPath.toLowerCase();
@@ -53,7 +59,7 @@ export async function middleware(req: NextRequest) {
     const session = await decrypt(cookie);
 
     if (!isPublicRoute && !session?.userId) {
-      return NextResponse.redirect(new URL("/start", req.nextUrl));
+      return NextResponse.redirect(new URL("/", req.nextUrl));
     }
 
     if (

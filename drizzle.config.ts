@@ -6,6 +6,9 @@ if (!connectionString) {
   throw new Error(
     "Database connection string not found in environment variables",
   );
+  throw new Error(
+    "Database connection string not found in environment variables",
+  );
 }
 
 export default {

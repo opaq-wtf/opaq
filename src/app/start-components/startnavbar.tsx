@@ -26,15 +26,8 @@ export default function StartNavbar() {
       >
         <div className="flex flex-col h-full p-8">
           <div className="flex items-center justify-between mb-8">
-            <a className="block" href="#">
+            <a className="block" href="/">
               <span className="sr-only">Home</span>
-              <Image
-                src="/outerAsset 14opaq-ful.svg"
-                alt="Wide Logo"
-                width={120}
-                height={32}
-                priority
-              />
             </a>
             <button
               className="rounded-full bg-gray-100 p-2 text-gray-600 dark:bg-gray-800 dark:text-white"
@@ -62,7 +55,7 @@ export default function StartNavbar() {
               <li>
                 <a
                   className="text-gray-900  hover:text-gray-500/75  transition"
-                  href="#"
+                  href="/about"
                   onClick={() => setSidebarOpen(false)}
                 >
                   About
@@ -71,7 +64,7 @@ export default function StartNavbar() {
               <li>
                 <a
                   className="text-gray-900 dark:text-white hover:text-gray-500/75 dark:hover:text-white/75 transition"
-                  href="#"
+                  href="/guidelines"
                   onClick={() => setSidebarOpen(false)}
                 >
                   Guidelines
@@ -80,7 +73,7 @@ export default function StartNavbar() {
               <li>
                 <a
                   className="text-gray-900 dark:text-white hover:text-gray-500/75 dark:hover:text-white/75 transition"
-                  href="#"
+                  href="/reach"
                   onClick={() => setSidebarOpen(false)}
                 >
                   Reach
@@ -113,14 +106,14 @@ export default function StartNavbar() {
           </nav>
         </div>
       </aside>
-      <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded-full shadow-lg backdrop-blur-md  border-2 border-gray-100 px-8 py-2 w-[98vw] max-w-6xl mx-auto">
+      <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded-full shadow-lg backdrop-blur-md  border-2 border-gray-100 px-8 py-2 w-[98vw] max-w-6xl  mx-auto">
         <div className="flex h-16 items-center justify-between relative">
           {/* Left padding for pill effect */}
           <div className="w-4 sm:w-8" />
           {/* Main content: logo, nav, button */}
           <div className="flex flex-1 items-center justify-between gap-8 px-4">
             {/* Logo */}
-            <a className="block" href="#">
+            <a className="block" href="/">
               <span className="sr-only">Home</span>
               <Image
                 src="/outerAsset 14opaq-ful.svg"
@@ -136,7 +129,7 @@ export default function StartNavbar() {
                 <li>
                   <a
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
-                    href="#"
+                    href="/about"
                   >
                     About
                   </a>
@@ -144,7 +137,7 @@ export default function StartNavbar() {
                 <li>
                   <a
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
-                    href="#"
+                    href="/guidelines"
                   >
                     Guidelines
                   </a>
@@ -152,7 +145,7 @@ export default function StartNavbar() {
                 <li>
                   <a
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
-                    href="#"
+                    href="/reach"
                   >
                     Reach
                   </a>
@@ -163,7 +156,7 @@ export default function StartNavbar() {
             <div className="hidden lg:flex items-center gap-4">
               <a
                 className="rounded-full bg-white px-5 py-2.5 text-md font-medium text-black shadow-sm hover:bg-transparent border-2 border-white hover:text-white transition ease-in-out duration-300 flex justify-center items-center gap-2"
-                href="#"
+                href="/sign-in"
               >
                 <span className="flex items-center gap-2 w-full justify-center">
                   Start Pitching

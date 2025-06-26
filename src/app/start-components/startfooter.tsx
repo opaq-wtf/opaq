@@ -2,57 +2,6 @@ export default function StartFooter() {
   return (
     <footer className="">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Removed logo and text */}
-        {/* <ul className="mt-1 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
-          <li>
-            <a
-              className="text-gray-100  transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full "
-              href="#"
-            >
-              About
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-gray-100  transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full "
-              href="#"
-            >
-              Careers
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-gray-100 transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full "
-              href="#"
-            >
-              History
-            </a>
-          </li>
-            <li>
-            <a
-              className="text-gray-100 transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
-              href="#"
-            >
-              Services
-            </a>
-            </li>
-          <li>
-            <a
-              className="text-gray-100 transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full "
-              href="#"
-            >
-              Projects
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-gray-100 transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full "
-              href="#"
-            >
-              Blog
-            </a>
-          </li>
-        </ul> */}
         <ul className="mt-12 flex justify-center gap-6 md:gap-8">
           <li>
             <a
@@ -63,7 +12,7 @@ export default function StartFooter() {
             >
               <span className="sr-only">Instagram</span>
               <svg
-                className="size-6 "
+                className="size-6 hover:size-10 transition-all duration-300"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -85,7 +34,7 @@ export default function StartFooter() {
             >
               <span className="sr-only">Twitter</span>
               <svg
-                className="size-6"
+                className="size-6 hover:size-10 transition-all duration-300"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -103,7 +52,7 @@ export default function StartFooter() {
             >
               <span className="sr-only">GitHub</span>
               <svg
-                className="size-6"
+                className="size-6 hover:size-10 transition-all duration-300"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -123,9 +72,9 @@ export default function StartFooter() {
               target="_blank"
               className="text-gray-100 hover:text-gray-300  "
             >
-              <span className="sr-only">Discord</span>
+              <span className="sr-only ">Discord</span>
               <svg
-                className="size-6"
+                className="size-6 hover:size-10 transition-all duration-300"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
