@@ -53,7 +53,7 @@ export default function SignIn() {
           },
         });
         setTimeout(() => {
-          router.push(`/${username}`);
+          router.push(`/dashboard`);
         }, 1500);
       }
     } catch (error: any) {
