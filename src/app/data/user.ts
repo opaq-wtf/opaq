@@ -30,7 +30,6 @@ function userDTO(user: any) {
 }
 */
 
-
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema/user";
 import { verifySession } from "@/lib/session";
