@@ -64,7 +64,7 @@ export default function SignUp() {
       const res = await axios.post("http://localhost:3000/auth/sign-up", data);
       if (res.status === 201) {
         toast.success("Please verify your mail.", {
-          description: res.data.message,
+          description: 'Your  account will be deleted if you do not verify within 7 days.',
           action: {
             label: "Close",
             onClick: () => {

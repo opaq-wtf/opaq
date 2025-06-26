@@ -17,6 +17,21 @@ export const getUserByUsername = cache(async (username: string) => {
   return user ? userDTO(user) : null;
 });
 
+export const getUser = cache(async () => {
+  const session = await verifySession();
+
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, session.userId as string))
+    .limit(1);
+
+    const user = result[0];
+    if (!user) throw new Error('User not found.');
+
+    return userDTO(user);
+})
+
 function userDTO(user: any) {
   return {
     id: user.id,

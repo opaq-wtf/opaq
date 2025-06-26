@@ -49,7 +49,7 @@ export async function verifySession() {
   const seshcookie = (await cookies()).get(cookie.name)?.value;
   const session = await decrypt(seshcookie);
   if (!session?.userId) {
-    redirect("/start");
+    redirect("/");
   }
 
   return { userId: session.userId };

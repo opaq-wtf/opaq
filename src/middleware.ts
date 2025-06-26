@@ -38,6 +38,7 @@ export async function middleware(req: NextRequest) {
     "/start",
     "/about",
     "/auth/verify-email",
+    '/api/posts',
   ];
 
   const normalizePath = currentPath.toLowerCase();
