@@ -24,13 +24,15 @@ export function Taskbar() {
                 {/* Dashboard Button */}
                 <div className="relative group">
                   <button className="rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 group-hover:w-36 focus:w-36 overflow-hidden duration-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="3" width="7" height="7" rx="2" className="fill-current text-green-400" />
-                          <rect x="14" y="3" width="7" height="7" rx="2" className="fill-current text-green-400" />
-                          <rect x="14" y="14" width="7" height="7" rx="2" className="fill-current text-green-400" />
-                          <rect x="3" y="14" width="7" height="7" rx="2" className="fill-current text-green-400" />
-                      </svg>
-                      <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200">Dashboard</span>
+                      <span className="flex justify-center items-center w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="3" width="7" height="7" rx="2" className="fill-current text-green-400" />
+                            <rect x="14" y="3" width="7" height="7" rx="2" className="fill-current text-green-400" />
+                            <rect x="14" y="14" width="7" height="7" rx="2" className="fill-current text-green-400" />
+                            <rect x="3" y="14" width="7" height="7" rx="2" className="fill-current text-green-400" />
+                        </svg>
+                      </span>
+                      <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pr-8">Dashboard</span>
                   </button>
                 </div>
                 {/* Flower Button */}
