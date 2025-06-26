@@ -7,160 +7,190 @@ import { users } from "@/lib/db/schema/user";
 import { eq } from "drizzle-orm";
 
 interface Post {
-    id: string;
-    user_id: string;
-    title: string;
-    content: string;
-    labels: string[];
-    status: 'Draft' | 'Published';
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  labels: string[];
+  status: "Draft" | "Published";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export async function GET(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-    try {
-        await MongoConnect();
-        const { id } = await params;
+  try {
+    await MongoConnect();
+    const { id } = await params;
 
-        const post = await posts.findOne({ id }).lean() as unknown as Post;
+    const post = (await posts.findOne({ id }).lean()) as unknown as Post;
 
-        if (!post) {
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
-        }
-
-        // Only return published posts or drafts owned by the current user
-        const user = await getUserOptional();
-
-        if (post.status === 'Draft' && (!user || post.user_id !== user.id)) {
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
-        }
-
-        // Fetch user information for the post
-        try {
-            const userResult = await db
-                .select({
-                    id: users.id,
-                    username: users.username,
-                    fullName: users.fullName
-                })
-                .from(users)
-                .where(eq(users.id, post.user_id))
-                .limit(1);
-
-            const postUser = userResult[0];
-            const postWithUser = {
-                ...post,
-                user: postUser ? {
-                    id: postUser.id,
-                    username: postUser.username,
-                    full_name: postUser.fullName
-                } : {
-                    id: post.user_id,
-                    username: 'unknown_user',
-                    full_name: 'Unknown User'
-                }
-            };
-
-            return NextResponse.json({ post: postWithUser }, { status: 200 });
-        } catch (error) {
-            console.error('Error fetching user for post:', error);
-            // Return post without user info if user fetch fails
-            const postWithUser = {
-                ...post,
-                user: {
-                    id: post.user_id,
-                    username: 'unknown_user',
-                    full_name: 'Unknown User'
-                }
-            };
-            return NextResponse.json({ post: postWithUser }, { status: 200 });
-        }
-    } catch (error: any) {
-        console.error('Error fetching post: ', error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    if (!post) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
+
+    // Only return published posts or drafts owned by the current user
+    const user = await getUserOptional();
+
+    if (post.status === "Draft" && (!user || post.user_id !== user.id)) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    // Fetch user information for the post
+    try {
+      const userResult = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          fullName: users.fullName,
+        })
+        .from(users)
+        .where(eq(users.id, post.user_id))
+        .limit(1);
+
+      const postUser = userResult[0];
+      const postWithUser = {
+        ...post,
+        user: postUser
+          ? {
+            id: postUser.id,
+            username: postUser.username,
+            full_name: postUser.fullName,
+          }
+          : {
+            id: post.user_id,
+            username: "unknown_user",
+            full_name: "Unknown User",
+          },
+      };
+
+      return NextResponse.json({ post: postWithUser }, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching user for post:", error);
+      // Return post without user info if user fetch fails
+      const postWithUser = {
+        ...post,
+        user: {
+          id: post.user_id,
+          username: "unknown_user",
+          full_name: "Unknown User",
+        },
+      };
+      return NextResponse.json({ post: postWithUser }, { status: 200 });
+    }
+  } catch (error: any) {
+    console.error("Error fetching post: ", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
 
 export async function PUT(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-    try {
-        await MongoConnect();
-        const { id } = await params;
-        const { title, content, labels, status } = await req.json();
+  try {
+    await MongoConnect();
+    const { id } = await params;
+    const { title, content, labels, status } = await req.json();
 
-        const user = await getUser();
-        if (!user || !user.id) {
-            return NextResponse.json({ message: 'User authentication required.' }, { status: 401 });
-        }
-
-        const post = await posts.findOne({ id }) as Post;
-        if (!post) {
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
-        }
-
-        // Check if user owns the post
-        if (post.user_id !== user.id) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-        }
-
-        // Update the post
-        const updatedPost = {
-            title: title?.trim() || post.title,
-            content: content?.trim() || post.content,
-            labels: labels || post.labels,
-            status: status || post.status,
-            updatedAt: new Date()
-        };
-
-        await posts.updateOne({ id }, updatedPost);
-
-        return NextResponse.json({
-            message: 'Post updated successfully.',
-            post: {
-                id: post.id,
-                title: post.title,
-                status: post.status
-            }
-        }, { status: 200 });
-    } catch (error: any) {
-        console.error('Error updating post: ', error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    const user = await getUser();
+    if (!user || !user.id) {
+      return NextResponse.json(
+        { message: "User authentication required." },
+        { status: 401 },
+      );
     }
+
+    const post = (await posts.findOne({ id })) as Post;
+    if (!post) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    // Check if user owns the post
+    if (post.user_id !== user.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+    }
+
+    // Update the post
+    post.title = title?.trim() || post.title;
+    post.content = content?.trim() || post.content;
+    post.labels = labels || post.labels;
+    post.status = status || post.status;
+    post.updatedAt = new Date();
+    // Update the post
+    const updatedPost = {
+      title: title?.trim() || post.title,
+      content: content?.trim() || post.content,
+      labels: labels || post.labels,
+      status: status || post.status,
+      updatedAt: new Date()
+    };
+
+    await post.save();
+    await posts.updateOne({ id }, updatedPost);
+
+    return NextResponse.json(
+      {
+        message: "Post updated successfully.",
+        post: {
+          id: post.id,
+          title: post.title,
+          status: post.status,
+        },
+      },
+      { status: 200 },
+    );
+  } catch (error: any) {
+    console.error("Error updating post: ", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
 
 export async function DELETE(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-    try {
-        await MongoConnect();
-        const { id } = await params;
+  try {
+    await MongoConnect();
+    const { id } = await params;
 
-        const user = await getUser();
-        if (!user || !user.id) {
-            return NextResponse.json({ message: 'User authentication required.' }, { status: 401 });
-        }
-
-        const post = await posts.findOne({ id }) as Post;
-        if (!post) {
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
-        }
-
-        // Check if user owns the post
-        if (post.user_id !== user.id) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-        }
-
-        await posts.deleteOne({ id });
-
-        return NextResponse.json({ message: 'Post deleted successfully.' }, { status: 200 });
-    } catch (error: any) {
-        console.error('Error deleting post: ', error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    const user = await getUser();
+    if (!user || !user.id) {
+      return NextResponse.json(
+        { message: "User authentication required." },
+        { status: 401 },
+      );
     }
+
+    const post = (await posts.findOne({ id })) as Post;
+    if (!post) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    // Check if user owns the post
+    if (post.user_id !== user.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+    }
+
+    await posts.deleteOne({ id });
+
+    return NextResponse.json(
+      { message: "Post deleted successfully." },
+      { status: 200 },
+    );
+  } catch (error: any) {
+    console.error("Error deleting post: ", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }

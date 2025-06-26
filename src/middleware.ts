@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
+  // Log IP details
+
   const header = req.headers.get("x-forwarded-for");
   const ip = header?.split(",")[0] || "Unknown IP";
 
@@ -19,33 +21,32 @@ export async function middleware(req: NextRequest) {
 
   const log = `[Access Log] - (${timeStamp}) ${path} [${method}] --> ${ip}`;
 
-  fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/log`,
-    {
-      method: "POST",
-      body: JSON.stringify({ message: log }),
-      headers: { "Content-Type": "application/json" },
-    },
-  ).catch((e) => console.error("Log send failed: ", e));
+  if (path !== "/api/log") {
+    fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/log`,
+      {
+        method: "POST",
+        body: JSON.stringify({ message: log }),
+        headers: { "Content-Type": "application/json" },
+      },
+    ).catch((e) => console.error("Log send failed: ", e));
+  }
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/home", "/wallet",
+  const protectedRoutes = [
+    "/home",
+    "/wallet",
     "/home",
     "/bloom",
     "/dashboard",
-    '/artwall/upload',
+    "/artwall/upload",
     "/artwall",
   ];
-  const publicRoutes = [
-    "/",
-    "/sign-in",
-    "/sign-up",
-    "/about",
-    "/guidelines",
-    "/reach",
 
-  ];
+  const publicRoutes = ["/", "/about", "/guidelines", "/reach"];
+
+  const authRoutes = ["/sign-in", "sign-up", "/forgot-password"];
 
   const normalizePath = currentPath.toLowerCase();
   const isDynamicRoute = /^\/[a-zA-Z0-9._]+$/.test(normalizePath); //Path for profiles like /user /user123 /user_123 /user.123
@@ -53,11 +54,16 @@ export async function middleware(req: NextRequest) {
   const isProtectedRoute =
     protectedRoutes.includes(currentPath) || isDynamicRoute;
   const isPublicRoute = publicRoutes.includes(currentPath);
+  const isAuthRoute = authRoutes.includes(currentPath);
+
+  const cookie = (await cookies()).get("session")?.value;
+  const session = await decrypt(cookie);
+
+  if (isAuthRoute && session?.userId) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+  }
 
   if (isProtectedRoute) {
-    const cookie = (await cookies()).get("session")?.value;
-    const session = await decrypt(cookie);
-
     if (!isPublicRoute && !session?.userId) {
       return NextResponse.redirect(new URL("/", req.nextUrl));
     }
@@ -76,6 +82,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|logo.svg|api/log|retro.gif).*)",
+    "/((?!_next/static|_next/image|favicon.ico|logo.svg|retro.gif|api/log).*)",
   ],
 };

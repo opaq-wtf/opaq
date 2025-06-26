@@ -18,7 +18,6 @@ export default function DashNav() {
         >
           <div className="flex h-screen flex-col justify-start pt-2 pb-6">
             <div>
-              
               {/* Menu Button */}
               <div className="flex justify-items-end mx-2">
                 <button
@@ -93,7 +92,9 @@ export default function DashNav() {
                         d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
                       />
                     </svg>
-                    <span className="px-4 group-hover:text-gray-700">My Likes</span>
+                    <span className="px-4 group-hover:text-gray-700">
+                      My Likes
+                    </span>
                   </a>
                 </li>
                 {/* ...rest of your menu items */}
@@ -144,7 +145,9 @@ export default function DashNav() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span className="px-4 group-hover:text-gray-700">Polls</span>
+                    <span className="px-4 group-hover:text-gray-700">
+                      Polls
+                    </span>
                   </a>
                 </li>
                 <li className="min-w-max hover:bg-gray-900 hover:text-white transition-all duration-300 ease-in-out">
@@ -169,12 +172,13 @@ export default function DashNav() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span className="px-4 group-hover:text-gray-700">Followers</span>
+                    <span className="px-4 group-hover:text-gray-700">
+                      Followers
+                    </span>
                   </a>
                 </li>
               </ul>
             </div>
-        
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import {
   Send,
   Trash2,
   ArrowLeft,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { ImageToolbar } from "./components/ImageToolbar";
@@ -25,13 +25,21 @@ export default function ArtWallPostEdit() {
   const [labels, setLabels] = useState("");
   const [status, setStatus] = useState("Draft");
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ title?: string; content?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; content?: string }>(
+    {},
+  );
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImg, setSelectedImg] = useState<HTMLImageElement | null>(null);
-  const [imgToolbar, setImgToolbar] = useState<{ x: number; y: number } | null>(null);
-  const [imgProps, setImgProps] = useState<{ width?: number; align?: string; crop?: boolean }>({});
+  const [imgToolbar, setImgToolbar] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [imgProps, setImgProps] = useState<{
+    width?: number;
+    align?: string;
+    crop?: boolean;
+  }>({});
   const [hasContent, setHasContent] = useState(false);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
 
@@ -46,12 +54,15 @@ export default function ArtWallPostEdit() {
     const htmlContent = editorRef.current?.innerHTML || "";
     // Check for actual text content or images
     const hasText = content.trim().length > 0;
-    const hasImages = htmlContent.includes('<img');
+    const hasImages = htmlContent.includes("<img");
     setHasContent(hasText || hasImages);
   }, []);
 
   // Use the editor hook for word/char counting
-  const { wordCount, charCount, updateCounts } = useEditor(title, getEditorContent);
+  const { wordCount, charCount, updateCounts } = useEditor(
+    title,
+    getEditorContent,
+  );
 
   // Helper function to clear all draft data
   const clearAllDraftData = useCallback(() => {
@@ -94,7 +105,10 @@ export default function ArtWallPostEdit() {
         body: JSON.stringify({
           title: title.trim(),
           content,
-          labels: labels.split(",").map(label => label.trim()).filter(Boolean),
+          labels: labels
+            .split(",")
+            .map((label) => label.trim())
+            .filter(Boolean),
           status: publish ? "Published" : status,
         }),
       });
@@ -108,16 +122,19 @@ export default function ArtWallPostEdit() {
       clearAllDraftData();
 
       // Show success message
-      toast.success(publish ? "Post published successfully!" : "Post saved successfully!");
+      toast.success(
+        publish ? "Post published successfully!" : "Post saved successfully!",
+      );
 
       // Redirect to artwall after a short delay
       setTimeout(() => {
         router.push("/artwall");
       }, 1000);
-
     } catch (error) {
       console.error("Error saving post:", error);
-      toast.error(`Failed to save post: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Failed to save post: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +148,7 @@ export default function ArtWallPostEdit() {
           title,
           content: getEditorContent(),
           labels,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
         localStorage.setItem("draft-post", JSON.stringify(draftData));
         setIsDraftSaved(true);
@@ -162,7 +179,9 @@ export default function ArtWallPostEdit() {
         const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000; // 24 hours
 
         if (isRecent && (parsed.title || parsed.content)) {
-          const shouldLoad = confirm("Found a recent draft. Would you like to continue editing it?");
+          const shouldLoad = confirm(
+            "Found a recent draft. Would you like to continue editing it?",
+          );
           if (shouldLoad) {
             setTitle(parsed.title || "");
             setLabels(parsed.labels || "");
@@ -196,7 +215,9 @@ export default function ArtWallPostEdit() {
 
   // Clear draft
   const clearDraft = () => {
-    const confirmed = confirm("Are you sure you want to clear all content? This action cannot be undone.");
+    const confirmed = confirm(
+      "Are you sure you want to clear all content? This action cannot be undone.",
+    );
     if (!confirmed) return;
 
     clearAllDraftData();
@@ -219,7 +240,7 @@ export default function ArtWallPostEdit() {
   // - Works with keyboard shortcuts: Ctrl+L (bullet), Ctrl+Shift+L (numbered)
   // - Tab/Shift+Tab for indentation/outdentation
   // - Enter key creates new list items, double Enter exits list
-  const insertList = (type: 'ul' | 'ol') => {
+  const insertList = (type: "ul" | "ol") => {
     if (!editorRef.current) return;
 
     const selection = window.getSelection();
@@ -230,20 +251,20 @@ export default function ArtWallPostEdit() {
 
     // Create the list element
     const listElement = document.createElement(type);
-    listElement.className = type === 'ul' ? 'list-disc' : 'list-decimal';
+    listElement.className = type === "ul" ? "list-disc" : "list-decimal";
 
     if (selectedText.trim()) {
       // If text is selected, convert it to list items
-      const lines = selectedText.split('\n').filter(line => line.trim());
-      lines.forEach(line => {
-        const li = document.createElement('li');
+      const lines = selectedText.split("\n").filter((line) => line.trim());
+      lines.forEach((line) => {
+        const li = document.createElement("li");
         li.textContent = line.trim();
         listElement.appendChild(li);
       });
     } else {
       // Create a single empty list item
-      const li = document.createElement('li');
-      li.innerHTML = '&nbsp;'; // Non-breaking space to make it focusable
+      const li = document.createElement("li");
+      li.innerHTML = "&nbsp;"; // Non-breaking space to make it focusable
       listElement.appendChild(li);
     }
 
@@ -252,7 +273,7 @@ export default function ArtWallPostEdit() {
     range.insertNode(listElement);
 
     // Move cursor to the first list item
-    const firstLi = listElement.querySelector('li');
+    const firstLi = listElement.querySelector("li");
     if (firstLi) {
       const newRange = document.createRange();
       newRange.setStart(firstLi, 0);
@@ -267,12 +288,12 @@ export default function ArtWallPostEdit() {
 
   // Toolbar actions
   const format = (command: string, value?: string) => {
-    if (command === 'insertUnorderedList') {
-      insertList('ul');
+    if (command === "insertUnorderedList") {
+      insertList("ul");
       return;
     }
-    if (command === 'insertOrderedList') {
-      insertList('ol');
+    if (command === "insertOrderedList") {
+      insertList("ol");
       return;
     }
 
@@ -280,13 +301,13 @@ export default function ArtWallPostEdit() {
     try {
       document.execCommand(command, false, value);
     } catch (error) {
-      console.warn('execCommand failed for', command, error);
+      console.warn("execCommand failed for", command, error);
       // Add manual implementations for critical commands if needed
-      if (command === 'bold') {
+      if (command === "bold") {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
-          const strong = document.createElement('strong');
+          const strong = document.createElement("strong");
           try {
             range.surroundContents(strong);
           } catch (error) {
@@ -305,26 +326,28 @@ export default function ArtWallPostEdit() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Handle Tab key for list indentation
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
-          const currentElement = range.startContainer.nodeType === Node.TEXT_NODE
-            ? range.startContainer.parentElement
-            : range.startContainer as Element;
+          const currentElement =
+            range.startContainer.nodeType === Node.TEXT_NODE
+              ? range.startContainer.parentElement
+              : (range.startContainer as Element);
 
-          const listItem = currentElement?.closest('li');
+          const listItem = currentElement?.closest("li");
           if (listItem) {
             e.preventDefault();
 
             if (e.shiftKey) {
               // Outdent (Shift + Tab)
               const parentList = listItem.parentElement;
-              const grandParentList = parentList?.parentElement?.closest('ul, ol');
+              const grandParentList =
+                parentList?.parentElement?.closest("ul, ol");
 
               if (grandParentList) {
                 // Move this item to the parent level
-                const parentLi = parentList?.parentElement?.closest('li');
+                const parentLi = parentList?.parentElement?.closest("li");
                 if (parentLi) {
                   grandParentList.insertBefore(listItem, parentLi.nextSibling);
 
@@ -336,13 +359,18 @@ export default function ArtWallPostEdit() {
               }
             } else {
               // Indent (Tab)
-              const prevSibling = listItem.previousElementSibling as HTMLLIElement;
+              const prevSibling =
+                listItem.previousElementSibling as HTMLLIElement;
               if (prevSibling) {
                 // Find or create a nested list in the previous item
-                let nestedList = prevSibling.querySelector('ul, ol') as HTMLUListElement | HTMLOListElement;
+                let nestedList = prevSibling.querySelector("ul, ol") as
+                  | HTMLUListElement
+                  | HTMLOListElement;
                 if (!nestedList) {
                   const parentList = listItem.parentElement;
-                  nestedList = document.createElement(parentList?.tagName.toLowerCase() as 'ul' | 'ol');
+                  nestedList = document.createElement(
+                    parentList?.tagName.toLowerCase() as "ul" | "ol",
+                  );
                   prevSibling.appendChild(nestedList);
                 }
 
@@ -364,34 +392,42 @@ export default function ArtWallPostEdit() {
       }
 
       // Handle list behavior with Enter key
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
-          const currentElement = range.startContainer.nodeType === Node.TEXT_NODE
-            ? range.startContainer.parentElement
-            : range.startContainer as Element;
+          const currentElement =
+            range.startContainer.nodeType === Node.TEXT_NODE
+              ? range.startContainer.parentElement
+              : (range.startContainer as Element);
 
           // Check if we're in a list item
-          const listItem = currentElement?.closest('li');
+          const listItem = currentElement?.closest("li");
           const list = listItem?.parentElement;
 
-          if (listItem && list && (list.tagName === 'UL' || list.tagName === 'OL')) {
+          if (
+            listItem &&
+            list &&
+            (list.tagName === "UL" || list.tagName === "OL")
+          ) {
             e.preventDefault();
 
             // If the current list item is empty, exit the list
             if (!listItem.textContent?.trim()) {
               // Create a new paragraph after the list
-              const newP = document.createElement('p');
-              newP.innerHTML = '&nbsp;';
+              const newP = document.createElement("p");
+              newP.innerHTML = "&nbsp;";
 
               // Find the top-level list to insert after
               let topLevelList = list;
-              while (topLevelList.parentElement?.closest('ul, ol')) {
-                topLevelList = topLevelList.parentElement.closest('ul, ol')!;
+              while (topLevelList.parentElement?.closest("ul, ol")) {
+                topLevelList = topLevelList.parentElement.closest("ul, ol")!;
               }
 
-              topLevelList.parentNode?.insertBefore(newP, topLevelList.nextSibling);
+              topLevelList.parentNode?.insertBefore(
+                newP,
+                topLevelList.nextSibling,
+              );
 
               // Remove the empty list item
               listItem.remove();
@@ -413,8 +449,8 @@ export default function ArtWallPostEdit() {
             }
 
             // Create a new list item
-            const newLi = document.createElement('li');
-            newLi.innerHTML = '&nbsp;';
+            const newLi = document.createElement("li");
+            newLi.innerHTML = "&nbsp;";
 
             // Insert after current list item
             listItem.parentNode?.insertBefore(newLi, listItem.nextSibling);
@@ -434,60 +470,60 @@ export default function ArtWallPostEdit() {
       // Handle other keyboard shortcuts
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
-          case 's':
+          case "s":
             e.preventDefault();
             handleSubmit(false);
             break;
-          case 'Enter':
+          case "Enter":
             e.preventDefault();
             handleSubmit(true);
             break;
-          case 'p':
+          case "p":
             e.preventDefault();
             setIsPreviewMode(!isPreviewMode);
             break;
-          case 'b':
+          case "b":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format('bold');
+              format("bold");
             }
             break;
-          case 'i':
+          case "i":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format('italic');
+              format("italic");
             }
             break;
-          case 'u':
+          case "u":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format('underline');
+              format("underline");
             }
             break;
-          case 'l':
+          case "l":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format(e.shiftKey ? 'insertOrderedList' : 'insertUnorderedList');
+              format(e.shiftKey ? "insertOrderedList" : "insertUnorderedList");
             }
             break;
-          case 'z':
+          case "z":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format('undo');
+              format("undo");
             }
             break;
-          case 'y':
+          case "y":
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
-              format('redo');
+              format("redo");
             }
             break;
         }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isPreviewMode, handleSubmit, format]);
 
   // Insert image at cursor
@@ -547,11 +583,14 @@ export default function ArtWallPostEdit() {
   function onImageClick(ev: Event, img: HTMLImageElement) {
     ev.stopPropagation();
     setSelectedImg(img);
-    setImgToolbar({ x: (ev as MouseEvent).clientX, y: (ev as MouseEvent).clientY });
+    setImgToolbar({
+      x: (ev as MouseEvent).clientX,
+      y: (ev as MouseEvent).clientY,
+    });
     setImgProps({
       width: img.width,
       align: img.style.textAlign || "center",
-      crop: img.style.objectFit === "cover"
+      crop: img.style.objectFit === "cover",
     });
   }
 
@@ -563,7 +602,12 @@ export default function ArtWallPostEdit() {
   function setImgAlign(align: string) {
     if (selectedImg) {
       selectedImg.style.display = "block";
-      selectedImg.style.margin = align === "center" ? "0 auto" : align === "left" ? "0 auto 0 0" : "0 0 0 auto";
+      selectedImg.style.margin =
+        align === "center"
+          ? "0 auto"
+          : align === "left"
+            ? "0 auto 0 0"
+            : "0 0 0 auto";
       setImgProps((p) => ({ ...p, align }));
     }
   }
@@ -604,9 +648,18 @@ export default function ArtWallPostEdit() {
             Back
           </Button>
           <div className="flex items-center gap-2">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="32" height="32" rx="8" fill="#FF5722"/>
-              <path d="M20.5 10.5C20.5 9.11929 19.3807 8 18 8H12C10.6193 8 9.5 9.11929 9.5 10.5V21.5C9.5 22.8807 10.6193 24 12 24H20C21.3807 24 22.5 22.8807 22.5 21.5V13C22.5 11.6193 21.3807 10.5 20.5 10.5Z" fill="white"/>
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect width="32" height="32" rx="8" fill="#FF5722" />
+              <path
+                d="M20.5 10.5C20.5 9.11929 19.3807 8 18 8H12C10.6193 8 9.5 9.11929 9.5 10.5V21.5C9.5 22.8807 10.6193 24 12 24H20C21.3807 24 22.5 22.8807 22.5 21.5V13C22.5 11.6193 21.3807 10.5 20.5 10.5Z"
+                fill="white"
+              />
             </svg>
             <span className="font-bold text-xl text-white">Artwall</span>
             <span className="text-gray-400 text-sm ml-2">/ Create Post</span>
@@ -625,7 +678,11 @@ export default function ArtWallPostEdit() {
             onClick={() => setIsPreviewMode(!isPreviewMode)}
             className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
           >
-            {isPreviewMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {isPreviewMode ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
             {isPreviewMode ? "Edit" : "Preview"}
           </Button>
           <Button
@@ -656,11 +713,7 @@ export default function ArtWallPostEdit() {
               </>
             )}
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={clearDraft}
-          >
+          <Button variant="destructive" size="sm" onClick={clearDraft}>
             <Trash2 className="w-4 h-4" />
             Clear
           </Button>
@@ -674,16 +727,21 @@ export default function ArtWallPostEdit() {
           <div className="mb-4">
             <input
               className={`text-3xl font-bold w-full outline-none border-b-2 py-3 transition bg-transparent text-white placeholder-gray-400 ${
-                errors.title ? 'border-red-500' : 'border-gray-700 focus:border-blue-500'
+                errors.title
+                  ? "border-red-500"
+                  : "border-gray-700 focus:border-blue-500"
               }`}
               placeholder="Enter your post title..."
               value={title}
-              onChange={e => {
+              onChange={(e) => {
                 setTitle(e.target.value);
-                if (errors.title) setErrors(prev => ({ ...prev, title: undefined }));
+                if (errors.title)
+                  setErrors((prev) => ({ ...prev, title: undefined }));
               }}
             />
-            {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
+            {errors.title && (
+              <p className="text-red-400 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           {/* Toolbar */}
@@ -702,10 +760,14 @@ export default function ArtWallPostEdit() {
                 style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
               >
                 <div className="prose-custom max-w-none">
-                  <div dangerouslySetInnerHTML={{ __html: getEditorContent() }} />
+                  <div
+                    dangerouslySetInnerHTML={{ __html: getEditorContent() }}
+                  />
                 </div>
                 {!getEditorContent().trim() && (
-                  <div className="text-gray-500 italic">Nothing to preview yet. Write some content first!</div>
+                  <div className="text-gray-500 italic">
+                    Nothing to preview yet. Write some content first!
+                  </div>
                 )}
               </div>
             ) : (
@@ -713,7 +775,9 @@ export default function ArtWallPostEdit() {
                 <div
                   ref={editorRef}
                   className={`editor-content min-h-[400px] outline-none p-4 border-2 rounded-lg bg-gray-800 text-white transition resize-none ${
-                    errors.content ? 'border-red-500' : 'border-gray-600 focus:border-blue-400'
+                    errors.content
+                      ? "border-red-500"
+                      : "border-gray-600 focus:border-blue-400"
                   }`}
                   contentEditable
                   suppressContentEditableWarning
@@ -725,19 +789,23 @@ export default function ArtWallPostEdit() {
                   onFocus={() => setIsEditorFocused(true)}
                   onBlur={() => setIsEditorFocused(false)}
                   onInput={() => {
-                    if (errors.content) setErrors(prev => ({ ...prev, content: undefined }));
+                    if (errors.content)
+                      setErrors((prev) => ({ ...prev, content: undefined }));
                     checkHasContent();
                     updateCounts();
                   }}
                 />
                 {!hasContent && !isEditorFocused && (
                   <div className="absolute top-5 left-5 text-gray-500 pointer-events-none">
-                    Write your post content here... You can add images, format text, and more!
+                    Write your post content here... You can add images, format
+                    text, and more!
                   </div>
                 )}
               </>
             )}
-            {errors.content && <p className="text-red-400 text-sm mt-2">{errors.content}</p>}
+            {errors.content && (
+              <p className="text-red-400 text-sm mt-2">{errors.content}</p>
+            )}
           </div>
 
           {/* Image Toolbar */}
@@ -763,16 +831,18 @@ export default function ArtWallPostEdit() {
               className="w-full border border-gray-600 rounded-lg px-4 py-3 focus:border-blue-500 outline-none bg-gray-800 text-white placeholder-gray-400 transition"
               placeholder="e.g. travel, tech, lifestyle"
               value={labels}
-              onChange={e => setLabels(e.target.value)}
+              onChange={(e) => setLabels(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Status
+            </label>
             <select
               className="w-full border border-gray-600 rounded-lg px-4 py-3 focus:border-blue-500 outline-none bg-gray-800 text-white transition"
               value={status}
-              onChange={e => setStatus(e.target.value)}
+              onChange={(e) => setStatus(e.target.value)}
             >
               <option value="Draft">Draft</option>
               <option value="Published">Published</option>
@@ -780,7 +850,9 @@ export default function ArtWallPostEdit() {
           </div>
 
           <div className="border-t border-gray-700 pt-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Post Statistics</h3>
+            <h3 className="text-sm font-medium text-gray-300 mb-3">
+              Post Statistics
+            </h3>
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex justify-between">
                 <span>Characters:</span>
@@ -798,7 +870,9 @@ export default function ArtWallPostEdit() {
           </div>
 
           <div className="border-t border-gray-700 pt-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Keyboard Shortcuts</h3>
+            <h3 className="text-sm font-medium text-gray-300 mb-3">
+              Keyboard Shortcuts
+            </h3>
             <div className="space-y-1 text-xs text-gray-400">
               <div className="flex justify-between">
                 <span>Save Draft:</span>
@@ -806,7 +880,9 @@ export default function ArtWallPostEdit() {
               </div>
               <div className="flex justify-between">
                 <span>Publish:</span>
-                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+Enter</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">
+                  Ctrl+Enter
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Preview:</span>

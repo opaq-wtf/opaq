@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { AlignLeft, AlignCenter, AlignRight, X } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { AlignLeft, AlignCenter, AlignRight, X } from "lucide-react";
 
 interface ImageToolbarProps {
   position: { x: number; y: number };
@@ -17,7 +17,7 @@ export function ImageToolbar({
   onAlignChange,
   onWidthChange,
   onCropToggle,
-  onClose
+  onClose,
 }: ImageToolbarProps) {
   return (
     <div
@@ -25,7 +25,7 @@ export function ImageToolbar({
         position: "fixed",
         top: position.y + 10,
         left: position.x,
-        zIndex: 50
+        zIndex: 50,
       }}
       className="bg-gray-900 text-white rounded-lg shadow-xl p-4 flex gap-3 items-center border border-gray-600"
     >
@@ -64,7 +64,7 @@ export function ImageToolbar({
           min={100}
           max={800}
           value={imgProps.width || 300}
-          onChange={e => onWidthChange(Number(e.target.value))}
+          onChange={(e) => onWidthChange(Number(e.target.value))}
           className="w-20"
         />
         <span className="text-sm min-w-[50px]">{imgProps.width || 300}px</span>

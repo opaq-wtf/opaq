@@ -27,10 +27,10 @@ export const getUser = cache(async () => {
     .limit(1);
 
   const user = result[0];
-  if (!user) throw new Error('User not found.');
+  if (!user) throw new Error("User not found.");
 
   return userDTO(user);
-})
+});
 
 export const getUserOptional = cache(async () => {
   const session = await getSession();

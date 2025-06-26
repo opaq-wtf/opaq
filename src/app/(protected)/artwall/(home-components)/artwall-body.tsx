@@ -38,18 +38,20 @@ export function ArtwallBody() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [interactions, setInteractions] = useState<Record<string, PostInteraction>>({});
+  const [interactions, setInteractions] = useState<
+    Record<string, PostInteraction>
+  >({});
   const router = useRouter();
 
   // Function to extract text content and limit description
   const getPostDescription = (htmlContent: string) => {
     // Remove HTML tags and get plain text
-    const textContent = htmlContent.replace(/<[^>]*>/g, '').trim();
-    const words = textContent.split(' ');
+    const textContent = htmlContent.replace(/<[^>]*>/g, "").trim();
+    const words = textContent.split(" ");
 
     // Limit to approximately 2 lines (about 20-25 words)
     if (words.length > 25) {
-      return words.slice(0, 25).join(' ') + '...';
+      return words.slice(0, 25).join(" ") + "...";
     }
     return textContent;
   };
@@ -57,10 +59,10 @@ export function ArtwallBody() {
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     }).format(date);
   };
 
@@ -68,16 +70,18 @@ export function ArtwallBody() {
   const fetchPosts = async (pageNum: number = 1, append: boolean = false) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/posts?status=Published&page=${pageNum}&limit=10`);
+      const response = await fetch(
+        `/api/posts?status=Published&page=${pageNum}&limit=10`,
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch posts');
+        throw new Error("Failed to fetch posts");
       }
 
       const data = await response.json();
 
       if (append) {
-        setPosts(prev => [...prev, ...data.posts]);
+        setPosts((prev) => [...prev, ...data.posts]);
       } else {
         setPosts(data.posts);
       }
@@ -85,17 +89,19 @@ export function ArtwallBody() {
       // Fetch interactions for each post
       const interactionPromises = data.posts.map(async (post: Post) => {
         try {
-          const interactionResponse = await fetch(`/api/interactions?post_id=${post.id}`);
+          const interactionResponse = await fetch(
+            `/api/interactions?post_id=${post.id}`,
+          );
           if (interactionResponse.ok) {
             const interactionData = await interactionResponse.json();
             return {
               postId: post.id,
               ...interactionData.stats,
-              ...interactionData.user_interaction
+              ...interactionData.user_interaction,
             };
           }
         } catch (error) {
-          console.error('Error fetching interaction for post:', post.id, error);
+          console.error("Error fetching interaction for post:", post.id, error);
         }
         return {
           postId: post.id,
@@ -122,12 +128,11 @@ export function ArtwallBody() {
         };
       });
 
-      setInteractions(prev => ({ ...prev, ...newInteractions }));
+      setInteractions((prev) => ({ ...prev, ...newInteractions }));
       setHasMore(data.pagination.page < data.pagination.pages);
-
     } catch (error) {
-      console.error('Error fetching posts:', error);
-      toast.error('Failed to load posts');
+      console.error("Error fetching posts:", error);
+      toast.error("Failed to load posts");
     } finally {
       setLoading(false);
     }
@@ -139,57 +144,59 @@ export function ArtwallBody() {
     const newLikedState = !currentInteraction?.liked;
 
     // Optimistic update
-    setInteractions(prev => ({
+    setInteractions((prev) => ({
       ...prev,
       [postId]: {
         ...prev[postId],
         liked: newLikedState,
-        likes: newLikedState ? prev[postId].likes + 1 : Math.max(0, prev[postId].likes - 1)
-      }
+        likes: newLikedState
+          ? prev[postId].likes + 1
+          : Math.max(0, prev[postId].likes - 1),
+      },
     }));
 
     try {
-      const response = await fetch('/api/interactions', {
-        method: 'POST',
+      const response = await fetch("/api/interactions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           post_id: postId,
-          action: 'like',
-          value: newLikedState
+          action: "like",
+          value: newLikedState,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update like');
+        throw new Error("Failed to update like");
       }
 
       const result = await response.json();
 
       // Update with real data from server
-      setInteractions(prev => ({
+      setInteractions((prev) => ({
         ...prev,
         [postId]: {
           ...prev[postId],
           liked: result.interaction.liked,
-          likes: result.stats.likes
-        }
+          likes: result.stats.likes,
+        },
       }));
 
-      toast.success(newLikedState ? 'Added to likes' : 'Removed from likes');
+      toast.success(newLikedState ? "Added to likes" : "Removed from likes");
     } catch (error) {
       // Revert optimistic update on error
-      setInteractions(prev => ({
+      setInteractions((prev) => ({
         ...prev,
         [postId]: {
           ...prev[postId],
           liked: currentInteraction?.liked || false,
-          likes: currentInteraction?.likes || 0
-        }
+          likes: currentInteraction?.likes || 0,
+        },
       }));
-      console.error('Error updating like:', error);
-      toast.error('Failed to update like');
+      console.error("Error updating like:", error);
+      toast.error("Failed to update like");
     }
   };
 
@@ -198,57 +205,59 @@ export function ArtwallBody() {
     const newSavedState = !currentInteraction?.saved;
 
     // Optimistic update
-    setInteractions(prev => ({
+    setInteractions((prev) => ({
       ...prev,
       [postId]: {
         ...prev[postId],
         saved: newSavedState,
-        saves: newSavedState ? prev[postId].saves + 1 : Math.max(0, prev[postId].saves - 1)
-      }
+        saves: newSavedState
+          ? prev[postId].saves + 1
+          : Math.max(0, prev[postId].saves - 1),
+      },
     }));
 
     try {
-      const response = await fetch('/api/interactions', {
-        method: 'POST',
+      const response = await fetch("/api/interactions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           post_id: postId,
-          action: 'save',
-          value: newSavedState
+          action: "save",
+          value: newSavedState,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update save');
+        throw new Error("Failed to update save");
       }
 
       const result = await response.json();
 
       // Update with real data from server
-      setInteractions(prev => ({
+      setInteractions((prev) => ({
         ...prev,
         [postId]: {
           ...prev[postId],
           saved: result.interaction.saved,
-          saves: result.stats.saves
-        }
+          saves: result.stats.saves,
+        },
       }));
 
-      toast.success(newSavedState ? 'Post saved' : 'Removed from saved posts');
+      toast.success(newSavedState ? "Post saved" : "Removed from saved posts");
     } catch (error) {
       // Revert optimistic update on error
-      setInteractions(prev => ({
+      setInteractions((prev) => ({
         ...prev,
         [postId]: {
           ...prev[postId],
           saved: currentInteraction?.saved || false,
-          saves: currentInteraction?.saves || 0
-        }
+          saves: currentInteraction?.saves || 0,
+        },
       }));
-      console.error('Error updating save:', error);
-      toast.error('Failed to update save');
+      console.error("Error updating save:", error);
+      toast.error("Failed to update save");
     }
   };
 
@@ -258,22 +267,24 @@ export function ArtwallBody() {
         await navigator.share({
           title: post.title,
           text: getPostDescription(post.content),
-          url: window.location.origin + `/artwall/post/${post.id}`
+          url: window.location.origin + `/artwall/post/${post.id}`,
         });
       } else {
         // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(window.location.origin + `/artwall/post/${post.id}`);
-        toast.success('Post link copied to clipboard');
+        await navigator.clipboard.writeText(
+          window.location.origin + `/artwall/post/${post.id}`,
+        );
+        toast.success("Post link copied to clipboard");
       }
     } catch (error) {
-      console.error('Error sharing:', error);
-      toast.error('Failed to share post');
+      console.error("Error sharing:", error);
+      toast.error("Failed to share post");
     }
   };
 
   const handleReport = (_postId: string) => {
     // You can implement a proper report modal here
-    toast.info('Report functionality will be implemented');
+    toast.info("Report functionality will be implemented");
   };
 
   // Navigate to full post
@@ -312,10 +323,14 @@ export function ArtwallBody() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="text-6xl mb-4">📝</div>
-          <h2 className="text-2xl font-bold text-gray-300 mb-2">No posts yet</h2>
-          <p className="text-gray-400 mb-6">Be the first to share your thoughts!</p>
+          <h2 className="text-2xl font-bold text-gray-300 mb-2">
+            No posts yet
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Be the first to share your thoughts!
+          </p>
           <Button
-            onClick={() => router.push('/artwall/upload')}
+            onClick={() => router.push("/artwall/upload")}
             className="bg-blue-600 hover:bg-blue-700"
           >
             Create First Post
@@ -331,10 +346,12 @@ export function ArtwallBody() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Latest Posts</h1>
-          <p className="text-gray-400">Discover amazing content from the community</p>
+          <p className="text-gray-400">
+            Discover amazing content from the community
+          </p>
         </div>
         <Button
-          onClick={() => router.push('/artwall/upload')}
+          onClick={() => router.push("/artwall/upload")}
           className="bg-blue-600 hover:bg-blue-700"
         >
           Create Post
@@ -423,15 +440,17 @@ export function ArtwallBody() {
                     handleLike(post.id);
                   }}
                   className={`text-gray-400 hover:text-red-400 ${
-                    interactions[post.id]?.liked ? 'text-red-400' : ''
+                    interactions[post.id]?.liked ? "text-red-400" : ""
                   }`}
                 >
                   <Heart
                     className={`w-4 h-4 mr-1 ${
-                      interactions[post.id]?.liked ? 'fill-current' : ''
+                      interactions[post.id]?.liked ? "fill-current" : ""
                     }`}
                   />
-                  <span className="text-sm">{interactions[post.id]?.likes || 0}</span>
+                  <span className="text-sm">
+                    {interactions[post.id]?.likes || 0}
+                  </span>
                 </Button>
 
                 <Button
@@ -442,15 +461,17 @@ export function ArtwallBody() {
                     handleSave(post.id);
                   }}
                   className={`text-gray-400 hover:text-blue-400 ${
-                    interactions[post.id]?.saved ? 'text-blue-400' : ''
+                    interactions[post.id]?.saved ? "text-blue-400" : ""
                   }`}
                 >
                   <Bookmark
                     className={`w-4 h-4 mr-1 ${
-                      interactions[post.id]?.saved ? 'fill-current' : ''
+                      interactions[post.id]?.saved ? "fill-current" : ""
                     }`}
                   />
-                  <span className="text-sm">{interactions[post.id]?.saves || 0}</span>
+                  <span className="text-sm">
+                    {interactions[post.id]?.saves || 0}
+                  </span>
                 </Button>
 
                 <Button
@@ -512,7 +533,7 @@ export function ArtwallBody() {
                 Loading...
               </>
             ) : (
-              'Load More Posts'
+              "Load More Posts"
             )}
           </Button>
         </div>

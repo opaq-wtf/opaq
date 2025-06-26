@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Bold,
   Italic,
@@ -17,8 +17,8 @@ import {
   Redo,
   Heading1,
   Heading2,
-  Heading3
-} from 'lucide-react';
+  Heading3,
+} from "lucide-react";
 
 interface EditorToolbarProps {
   onFormat: (command: string, value?: string) => void;
@@ -27,7 +27,12 @@ interface EditorToolbarProps {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function EditorToolbar({ onFormat, onImageUpload, fileInputRef, onImageChange }: EditorToolbarProps) {
+export function EditorToolbar({
+  onFormat,
+  onImageUpload,
+  fileInputRef,
+  onImageChange,
+}: EditorToolbarProps) {
   const handleLinkInsert = () => {
     const url = prompt("Enter URL:");
     if (url) {

@@ -6,32 +6,32 @@ import { Heart } from "lucide-react";
 import Image from "next/image";
 
 const recentPosts = [
-	{
-		id: 1,
-		title: "Understanding React Server Components",
-		description:
-			"A deep dive into React Server Components and their impact on modern web apps.",
-		date: "2024-06-01",
-		image: "/retro.gif",
-		likes: 42,
-	},
-	{
-		id: 2,
-		title: "TypeScript Tips for Large Projects",
-		description:
-			"Best practices and tips for scaling TypeScript in big codebases.",
-		date: "2024-05-28",
-		image: "/Eyes.gif",
-		likes: 31,
-	},
-	{
-		id: 3,
-		title: "Optimizing Next.js Apps",
-		description: "Performance strategies for Next.js applications.",
-		date: "2024-05-20",
-		image: "/logo.svg",
-		likes: 27,
-	},
+  {
+    id: 1,
+    title: "Understanding React Server Components",
+    description:
+      "A deep dive into React Server Components and their impact on modern web apps.",
+    date: "2024-06-01",
+    image: "/retro.gif",
+    likes: 42,
+  },
+  {
+    id: 2,
+    title: "TypeScript Tips for Large Projects",
+    description:
+      "Best practices and tips for scaling TypeScript in big codebases.",
+    date: "2024-05-28",
+    image: "/Eyes.gif",
+    likes: 31,
+  },
+  {
+    id: 3,
+    title: "Optimizing Next.js Apps",
+    description: "Performance strategies for Next.js applications.",
+    date: "2024-05-20",
+    image: "/logo.svg",
+    likes: 27,
+  },
 ];
 
 export default function DashBody() {
