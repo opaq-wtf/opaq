@@ -248,7 +248,7 @@ export function DiscussionItem({
                   size="sm"
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`discussion-like-button p-1 h-auto flex items-center gap-1.5 hover:bg-transparent ${
+                  className={`discussion-like-button p-1 h-auto flex items-center gap-1.5 hover:bg-black ${
                     discussion.user_liked
                       ? 'text-red-500 hover:text-red-400'
                       : 'text-gray-400 hover:text-red-500'
