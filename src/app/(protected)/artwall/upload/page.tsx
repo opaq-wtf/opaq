@@ -1,22 +1,250 @@
 "use client";
 
-// Blogger.com Post Edit Page Clone
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  EyeOff,
+  Save,
+  Send,
+  Trash2,
+  ArrowLeft,
+  Loader2
+} from "lucide-react";
+import { EditorToolbar } from "./components/EditorToolbar";
+import { ImageToolbar } from "./components/ImageToolbar";
+import { useEditor } from "./hooks/useEditor";
+import "./editor-styles.css";
 
-export default function BloggerPostEdit() {
+export default function ArtWallPostEdit() {
+  const router = useRouter();
   const editorRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState("");
   const [labels, setLabels] = useState("");
   const [status, setStatus] = useState("Draft");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ title?: string; content?: string }>({});
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImg, setSelectedImg] = useState<HTMLImageElement | null>(null);
   const [imgToolbar, setImgToolbar] = useState<{ x: number; y: number } | null>(null);
   const [imgProps, setImgProps] = useState<{ width?: number; align?: string; crop?: boolean }>({});
+  const [hasContent, setHasContent] = useState(false);
+
+  // Get content from editor
+  const getEditorContent = useCallback(() => {
+    return editorRef.current?.innerHTML || "";
+  }, []);
+
+  // Check if editor has meaningful content
+  const checkHasContent = useCallback(() => {
+    const content = editorRef.current?.innerText || "";
+    const htmlContent = editorRef.current?.innerHTML || "";
+    // Check for actual text content or images
+    const hasText = content.trim().length > 0;
+    const hasImages = htmlContent.includes('<img');
+    setHasContent(hasText || hasImages);
+  }, []);
+
+  // Use the editor hook for word/char counting
+  const { wordCount, charCount, updateCounts } = useEditor(title, getEditorContent);
+
+  // Form validationartwall
+  const validateForm = useCallback(() => {
+    const newErrors: { title?: string; content?: string } = {};
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    const content = editorRef.current?.innerHTML || "";
+    if (!content.trim() || content === "<br>") {
+      newErrors.content = "Content is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [title]);
+
+  // Submit post
+  const handleSubmit = async (publish = false) => {
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const content = getEditorContent();
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          content,
+          labels: labels.split(",").map(label => label.trim()).filter(Boolean),
+          status: publish ? "Published" : status,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save post");
+      }
+
+      const result = await response.json();
+      toast.success(publish ? "Post published successfully!" : "Post saved successfully!");
+
+      // Clear draft and redirect
+      localStorage.removeItem("draft-post");
+      setTimeout(() => {
+        router.push("/artwall");
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error saving post:", error);
+      toast.error("Failed to save post. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-save functionality with visual feedback
+  useEffect(() => {
+    const autoSave = () => {
+      if (title.trim() || getEditorContent().trim()) {
+        localStorage.setItem("draft-post", JSON.stringify({
+          title,
+          content: getEditorContent(),
+          labels,
+          timestamp: Date.now()
+        }));
+        setIsDraftSaved(true);
+        setTimeout(() => setIsDraftSaved(false), 2000);
+      }
+    };
+
+    const interval = setInterval(autoSave, 30000); // Auto-save every 30 seconds
+    return () => clearInterval(interval);
+  }, [title, labels, getEditorContent]);
+
+  // Update counts when content changes
+  useEffect(() => {
+    updateCounts();
+  }, [title, updateCounts]);
+
+  // Check content on mount and when editor changes
+  useEffect(() => {
+    checkHasContent();
+  }, [checkHasContent]);
+
+  // Load draft on mount
+  useEffect(() => {
+    const draft = localStorage.getItem("draft-post");
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000; // 24 hours
+
+        if (isRecent && (parsed.title || parsed.content)) {
+          const shouldLoad = confirm("Found a recent draft. Would you like to continue editing it?");
+          if (shouldLoad) {
+            setTitle(parsed.title || "");
+            setLabels(parsed.labels || "");
+            if (editorRef.current && parsed.content) {
+              editorRef.current.innerHTML = parsed.content;
+              // Check content after loading
+              setTimeout(() => checkHasContent(), 100);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error);
+      }
+    }
+  }, []);
+
+  // Clear draft
+  const clearDraft = () => {
+    const confirmed = confirm("Are you sure you want to clear all content? This action cannot be undone.");
+    if (!confirmed) return;
+
+    localStorage.removeItem("draft-post");
+    setTitle("");
+    setLabels("");
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
+    setErrors({});
+    setHasContent(false);
+    updateCounts();
+    toast.success("Draft cleared");
+  };
 
   // Toolbar actions (basic demo)
   const format = (command: string, value?: string) => {
     document.execCommand(command, false, value);
+    editorRef.current?.focus();
   };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 's':
+            e.preventDefault();
+            handleSubmit(false);
+            break;
+          case 'Enter':
+            e.preventDefault();
+            handleSubmit(true);
+            break;
+          case 'p':
+            e.preventDefault();
+            setIsPreviewMode(!isPreviewMode);
+            break;
+          case 'b':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format('bold');
+            }
+            break;
+          case 'i':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format('italic');
+            }
+            break;
+          case 'u':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format('underline');
+            }
+            break;
+          case 'z':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format('undo');
+            }
+            break;
+          case 'y':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format('redo');
+            }
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isPreviewMode, handleSubmit, format]);
 
   // Insert image at cursor
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,15 +258,22 @@ export default function BloggerPostEdit() {
         img.className = "max-w-full my-2 rounded shadow cursor-move";
         img.draggable = true;
         img.style.display = "block";
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
         img.addEventListener("click", (ev) => onImageClick(ev, img));
         img.addEventListener("dragstart", onImageDragStart);
         img.addEventListener("dragend", onImageDragEnd);
+
         const sel = window.getSelection();
         if (sel && sel.rangeCount > 0) {
           sel.getRangeAt(0).insertNode(img);
         } else {
           editorRef.current?.appendChild(img);
         }
+
+        // Check content after adding image
+        checkHasContent();
+        updateCounts();
       };
       reader.readAsDataURL(file);
       e.target.value = "";
@@ -69,12 +304,18 @@ export default function BloggerPostEdit() {
     ev.stopPropagation();
     setSelectedImg(img);
     setImgToolbar({ x: (ev as MouseEvent).clientX, y: (ev as MouseEvent).clientY });
-    setImgProps({ width: img.width, align: img.style.textAlign || "center", crop: img.style.objectFit === "cover" });
+    setImgProps({
+      width: img.width,
+      align: img.style.textAlign || "center",
+      crop: img.style.objectFit === "cover"
+    });
   }
+
   function closeImgToolbar() {
     setSelectedImg(null);
     setImgToolbar(null);
   }
+
   function setImgAlign(align: string) {
     if (selectedImg) {
       selectedImg.style.display = "block";
@@ -82,12 +323,14 @@ export default function BloggerPostEdit() {
       setImgProps((p) => ({ ...p, align }));
     }
   }
+
   function setImgWidth(width: number) {
     if (selectedImg) {
       selectedImg.style.width = width + "px";
       setImgProps((p) => ({ ...p, width }));
     }
   }
+
   function setImgCrop(crop: boolean) {
     if (selectedImg) {
       selectedImg.style.objectFit = crop ? "cover" : "contain";
@@ -105,143 +348,255 @@ export default function BloggerPostEdit() {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <header className="w-full bg-black shadow px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="8" fill="#FF5722"/><path d="M20.5 10.5C20.5 9.11929 19.3807 8 18 8H12C10.6193 8 9.5 9.11929 9.5 10.5V21.5C9.5 22.8807 10.6193 24 12 24H20C21.3807 24 22.5 22.8807 22.5 21.5V13C22.5 11.6193 21.3807 10.5 20.5 10.5Z" fill="white"/></svg>
-          <span className="font-bold text-xl text-white">Blogger</span>
+      <header className="sticky top-0 w-full bg-black/95 backdrop-blur-sm shadow-lg px-6 py-4 flex items-center justify-between border-b border-gray-800 z-40">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <div className="flex items-center gap-2">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="8" fill="#FF5722"/>
+              <path d="M20.5 10.5C20.5 9.11929 19.3807 8 18 8H12C10.6193 8 9.5 9.11929 9.5 10.5V21.5C9.5 22.8807 10.6193 24 12 24H20C21.3807 24 22.5 22.8807 22.5 21.5V13C22.5 11.6193 21.3807 10.5 20.5 10.5Z" fill="white"/>
+            </svg>
+            <span className="font-bold text-xl text-white">Artwall</span>
+            <span className="text-gray-400 text-sm ml-2">/ Create Post</span>
+          </div>
+          {isDraftSaved && (
+            <div className="flex items-center gap-1 text-green-400 text-sm">
+              <Save className="w-3 h-3" />
+              Draft saved
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Publish</button>
-          <button className="bg-gray-800 text-gray-200 px-4 py-2 rounded hover:bg-gray-700 transition">Preview</button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPreviewMode(!isPreviewMode)}
+            className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
+          >
+            {isPreviewMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {isPreviewMode ? "Edit" : "Preview"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleSubmit(false)}
+            disabled={isLoading}
+            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+          >
+            <Save className="w-4 h-4" />
+            Save Draft
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => handleSubmit(true)}
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Publishing...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Publish
+              </>
+            )}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={clearDraft}
+          >
+            <Trash2 className="w-4 h-4" />
+            Clear
+          </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-1 w-full max-w-6xl mx-auto mt-8 gap-8">
+      <main className="flex flex-1 w-full max-w-7xl mx-auto mt-8 gap-8 px-4">
         {/* Editor Section */}
-        <section className="flex-1 bg-black rounded shadow p-8 flex flex-col">
-          <input
-            className="text-3xl font-bold mb-4 outline-none border-b border-gray-700 focus:border-blue-500 transition bg-black text-white placeholder-gray-400"
-            placeholder="Post title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-          />
+        <section className="flex-1 bg-gray-900 rounded-lg shadow-xl p-8 flex flex-col border border-gray-700">
+          <div className="mb-4">
+            <input
+              className={`text-3xl font-bold w-full outline-none border-b-2 py-3 transition bg-transparent text-white placeholder-gray-400 ${
+                errors.title ? 'border-red-500' : 'border-gray-700 focus:border-blue-500'
+              }`}
+              placeholder="Enter your post title..."
+              value={title}
+              onChange={e => {
+                setTitle(e.target.value);
+                if (errors.title) setErrors(prev => ({ ...prev, title: undefined }));
+              }}
+            />
+            {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
+          </div>
 
           {/* Toolbar */}
-          <div className="flex gap-2 mb-4 border-b border-gray-700 pb-2">
-            <button onClick={() => format("bold")}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Bold">
-              <b>B</b>
-            </button>
-            <button onClick={() => format("italic")}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Italic">
-              <i>I</i>
-            </button>
-            <button onClick={() => format("underline")}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Underline">
-              <u>U</u>
-            </button>
-            <button onClick={() => format("insertUnorderedList")}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Bullet List">
-              <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><circle cx="4" cy="5" r="1.5" fill="#555"/><circle cx="4" cy="9" r="1.5" fill="#555"/><circle cx="4" cy="13" r="1.5" fill="#555"/><rect x="8" y="4.25" width="7" height="1.5" rx="0.75" fill="#555"/><rect x="8" y="8.25" width="7" height="1.5" rx="0.75" fill="#555"/><rect x="8" y="12.25" width="7" height="1.5" rx="0.75" fill="#555"/></svg>
-            </button>
-            <button onClick={() => format("insertOrderedList")}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Numbered List">
-              <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><text x="2" y="7" fontSize="4" fill="#555">1.</text><rect x="8" y="4.25" width="7" height="1.5" rx="0.75" fill="#555"/><text x="2" y="11" fontSize="4" fill="#555">2.</text><rect x="8" y="8.25" width="7" height="1.5" rx="0.75" fill="#555"/><text x="2" y="15" fontSize="4" fill="#555">3.</text><rect x="8" y="12.25" width="7" height="1.5" rx="0.75" fill="#555"/></svg>
-            </button>
-            <button onClick={() => format("createLink", prompt("Enter URL") || undefined)}
-              className="p-2 hover:bg-gray-800 rounded text-white" title="Insert Link">
-              <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M7 11a3 3 0 0 1 0-6h2" stroke="#555" strokeWidth="1.5"/><path d="M11 7a3 3 0 0 1 0 6H9" stroke="#555" strokeWidth="1.5"/></svg>
-            </button>
-            {/* Insert Image Button */}
-            <button
-              type="button"
-              className="p-2 hover:bg-gray-800 rounded text-white"
-              title="Insert Image"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="2" fill="#555"/><circle cx="6" cy="7" r="2" fill="#fff"/><path d="M2 14l4-4a2 2 0 0 1 2.8 0l3.2 3.2a1 1 0 0 0 1.4 0L16 10" stroke="#fff" strokeWidth="1.5"/></svg>
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </div>
+          <EditorToolbar
+            onFormat={format}
+            onImageUpload={() => fileInputRef.current?.click()}
+            fileInputRef={fileInputRef}
+            onImageChange={handleImageUpload}
+          />
 
           {/* Rich Text Editor */}
-          <div
-            ref={editorRef}
-            className="min-h-[300px] outline-none p-4 border border-gray-700 rounded bg-black text-white focus:bg-black focus:border-blue-400 transition"
-            contentEditable
-            suppressContentEditableWarning
-            spellCheck={true}
-            aria-label="Post content editor"
-            style={{ fontSize: "1.1rem" }}
-            onDrop={onEditorDrop}
-            onClick={onEditorClick}
-          >
-            Start writing your post here...
+          <div className="flex-1 relative">
+            {isPreviewMode ? (
+              <div
+                className="min-h-[400px] p-4 border-2 rounded-lg bg-gray-800 text-white border-gray-600"
+                style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+              >
+                <div className="prose-custom max-w-none">
+                  <div dangerouslySetInnerHTML={{ __html: getEditorContent() }} />
+                </div>
+                {!getEditorContent().trim() && (
+                  <div className="text-gray-500 italic">Nothing to preview yet. Write some content first!</div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div
+                  ref={editorRef}
+                  className={`editor-content min-h-[400px] outline-none p-4 border-2 rounded-lg bg-gray-800 text-white transition resize-none ${
+                    errors.content ? 'border-red-500' : 'border-gray-600 focus:border-blue-400'
+                  }`}
+                  contentEditable
+                  suppressContentEditableWarning
+                  spellCheck={true}
+                  aria-label="Post content editor"
+                  style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                  onDrop={onEditorDrop}
+                  onClick={onEditorClick}
+                  onInput={() => {
+                    if (errors.content) setErrors(prev => ({ ...prev, content: undefined }));
+                    checkHasContent();
+                    updateCounts();
+                  }}
+                />
+                {!hasContent && (
+                  <div className="absolute top-5 left-5 text-gray-500 pointer-events-none">
+                    Write your post content here... You can add images, format text, and more!
+                  </div>
+                )}
+              </>
+            )}
+            {errors.content && <p className="text-red-400 text-sm mt-2">{errors.content}</p>}
           </div>
+
           {/* Image Toolbar */}
           {imgToolbar && selectedImg && (
-            <div
-              style={{ position: "fixed", top: imgToolbar.y + 10, left: imgToolbar.x, zIndex: 50 }}
-              className="bg-gray-900 text-white rounded shadow-lg p-3 flex gap-2 items-center border border-gray-700"
-            >
-              <span>Align:</span>
-              <button onClick={() => setImgAlign("left")} className="px-2 py-1 rounded hover:bg-gray-700">Left</button>
-              <button onClick={() => setImgAlign("center")} className="px-2 py-1 rounded hover:bg-gray-700">Center</button>
-              <button onClick={() => setImgAlign("right")} className="px-2 py-1 rounded hover:bg-gray-700">Right</button>
-              <span>Width:</span>
-              <input
-                type="range"
-                min={50}
-                max={800}
-                value={imgProps.width || 300}
-                onChange={e => setImgWidth(Number(e.target.value))}
-                className="mx-2"
-              />
-              <span>{imgProps.width || 300}px</span>
-              <span>Crop:</span>
-              <button
-                onClick={() => setImgCrop(!imgProps.crop)}
-                className="px-2 py-1 rounded hover:bg-gray-700"
-              >
-                {imgProps.crop ? "Uncrop" : "Crop"}
-              </button>
-              <button onClick={closeImgToolbar} className="ml-2 px-2 py-1 rounded bg-red-700 hover:bg-red-800">Close</button>
-            </div>
+            <ImageToolbar
+              position={imgToolbar}
+              imgProps={imgProps}
+              onAlignChange={setImgAlign}
+              onWidthChange={setImgWidth}
+              onCropToggle={() => setImgCrop(!imgProps.crop)}
+              onClose={closeImgToolbar}
+            />
           )}
         </section>
 
         {/* Sidebar */}
-        <aside className="w-80 bg-black rounded shadow p-6 flex flex-col gap-6 border border-gray-700">
+        <aside className="w-80 bg-gray-900 rounded-lg shadow-xl p-6 flex flex-col gap-6 border border-gray-700 h-fit">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Labels</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Labels <span className="text-gray-500">(comma separated)</span>
+            </label>
             <input
-              className="w-full border border-gray-700 rounded px-3 py-2 focus:border-blue-500 outline-none bg-black text-white placeholder-gray-400"
-              placeholder="e.g. travel, tech"
+              className="w-full border border-gray-600 rounded-lg px-4 py-3 focus:border-blue-500 outline-none bg-gray-800 text-white placeholder-gray-400 transition"
+              placeholder="e.g. travel, tech, lifestyle"
               value={labels}
               onChange={e => setLabels(e.target.value)}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
             <select
-              className="w-full border border-gray-700 rounded px-3 py-2 focus:border-blue-500 outline-none bg-black text-white"
+              className="w-full border border-gray-600 rounded-lg px-4 py-3 focus:border-blue-500 outline-none bg-gray-800 text-white transition"
               value={status}
               onChange={e => setStatus(e.target.value)}
             >
-              <option className="bg-black text-white">Draft</option>
-              <option className="bg-black text-white">Published</option>
+              <option value="Draft">Draft</option>
+              <option value="Published">Published</option>
             </select>
           </div>
-          <div className="flex gap-2 mt-4">
-            <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Save</button>
-            <button className="flex-1 bg-gray-800 text-gray-200 px-4 py-2 rounded hover:bg-gray-700 transition">Close</button>
+
+          <div className="border-t border-gray-700 pt-4">
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Post Statistics</h3>
+            <div className="space-y-2 text-sm text-gray-400">
+              <div className="flex justify-between">
+                <span>Characters:</span>
+                <span>{charCount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Words:</span>
+                <span>{wordCount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Reading time:</span>
+                <span>{Math.ceil(wordCount / 200)} min</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 pt-4">
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Keyboard Shortcuts</h3>
+            <div className="space-y-1 text-xs text-gray-400">
+              <div className="flex justify-between">
+                <span>Save Draft:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+S</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Publish:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+Enter</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Preview:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+P</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Bold:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+B</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Italic:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+I</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Underline:</span>
+                <span className="bg-gray-800 px-2 py-1 rounded">Ctrl+U</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-auto">
+            <Button
+              onClick={() => handleSubmit(false)}
+              disabled={isLoading}
+              variant="secondary"
+              className="flex-1"
+            >
+              Save Draft
+            </Button>
+            <Button
+              onClick={() => router.back()}
+              variant="destructive"
+              className="flex-1"
+            >
+              Cancel
+            </Button>
           </div>
         </aside>
       </main>

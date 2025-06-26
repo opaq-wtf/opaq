@@ -11,7 +11,7 @@ const recentPosts = [
 		description:
 			"A deep dive into React Server Components and their impact on modern web apps.",
 		date: "2024-06-01",
-		image: "/public/retro.gif",
+		image: "/retro.gif",
 		likes: 42,
 	},
 	{
@@ -20,7 +20,7 @@ const recentPosts = [
 		description:
 			"Best practices and tips for scaling TypeScript in big codebases.",
 		date: "2024-05-28",
-		image: "/public/Eyes.gif",
+		image: "/Eyes.gif",
 		likes: 31,
 	},
 	{
@@ -28,7 +28,7 @@ const recentPosts = [
 		title: "Optimizing Next.js Apps",
 		description: "Performance strategies for Next.js applications.",
 		date: "2024-05-20",
-		image: "/public/logo.svg",
+		image: "/logo.svg",
 		likes: 27,
 	},
 ];
