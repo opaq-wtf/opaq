@@ -30,12 +30,9 @@ export async function middleware(req: NextRequest) {
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/home", "/wallet",
+  const protectedRoutes = [ "/wallet",
     "/home",
-    "/bloom",
-    "/dashboard",
-    '/artwall/upload',
-    "/artwall",
+    
   ];
   const publicRoutes = [
     "/",
@@ -44,6 +41,10 @@ export async function middleware(req: NextRequest) {
     "/about",
     "/guidelines",
     "/reach",
+    "/bloom",
+    "/dashboard",
+    '/artwall/upload',
+    "/artwall",
 
   ];
 

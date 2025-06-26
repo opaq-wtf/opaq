@@ -20,29 +20,26 @@ function useClickOutside(
 export default function HomeNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
   useClickOutside(menuRef, () => setMenuOpen(false));
-
   return (
     <header className="bg-black ">
-      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+      <div className="mx-auto max-w-screen-xl px-2 sm:px-6 lg:px-8">
+        <div className="flex h-18 items-center justify-between">
           <div className="flex-1 md:flex md:items-center md:gap-12">
-            <a className="block text-teal-600 dark:text-teal-300" href="#">
+            <a className="block text-teal-600 dark:text-teal-300 flex flex-col items-start" href="#">
               <span className="sr-only">Home</span>
               <img
                 src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
                 alt="Home Logo"
                 className="h-8 w-auto object-cover rounded"
               />
+              <h1
+                className="text-md text-white font-medium mt-1"
+                style={{ fontFamily: "'Kanit', sans-serif" }}
+              >
+                Artwall
+              </h1>
             </a>
-            <h1>|</h1>
-            <h1
-              className="text-4xl font-medium"
-              style={{ fontFamily: "'Kanit', sans-serif" }}
-            >
-              Artwall
-            </h1>
             <link
               href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap"
               rel="stylesheet"
@@ -50,7 +47,7 @@ export default function HomeNav() {
           </div>
 
           <div className="md:flex md:items-center md:gap-12">
-            <div className="relative hidden md:block" ref={menuRef}>
+            <div className="relative" ref={menuRef}>
               <button
                 type="button"
                 className="overflow-hidden rounded-full border border-gray-300 shadow-inner dark:border-gray-600"
@@ -117,25 +114,6 @@ export default function HomeNav() {
                   </div>
                 </div>
               )}
-
-              <div className="block md:hidden">
-                <button className="rounded-sm bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75 dark:bg-gray-800 dark:text-white dark:hover:text-white/75">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="size-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </div>
