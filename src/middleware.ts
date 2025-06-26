@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = [, "/home"]; // Need to create the dashboard route
+  const protectedRoutes = ["/home"]; // Need to create the dashboard route
   const publicRoutes = [
     "/",
     "/sign-in",
