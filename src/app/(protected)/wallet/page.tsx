@@ -4,13 +4,11 @@ import {
   Copy,
   Plus,
   Send,
-  Compass,
   LayoutGrid,
   ArrowDown,
   Home,
   ArrowUp,
 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -37,6 +35,7 @@ const WalletPage = () => {
         setArPrice(data.arweave.usd);
         setArPriceChange(data.arweave.usd_24h_change);
       } catch (err) {
+        console.error("Error fetching AR price:", err);
         setError("Failed to fetch AR price");
       } finally {
         setLoading(false);

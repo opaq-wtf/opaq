@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Send, X, User, Smile } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DiscussionFormProps {
   postId: string;
@@ -16,7 +17,6 @@ interface DiscussionFormProps {
 }
 
 export function DiscussionForm({
-  postId,
   parentId,
   replyingTo,
   placeholder = "Start a discussion...",
@@ -37,6 +37,9 @@ export function DiscussionForm({
       setIsFocused(false);
     } catch (error) {
       // Error handling is done in parent component
+      console.error('Error submitting discussion:', error);
+      // Optionally, you could show a toast or notification here
+      toast.error('Failed to post discussion. Please try again.');
     }
   };
 

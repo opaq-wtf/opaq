@@ -271,7 +271,7 @@ export function ArtwallBody() {
     }
   };
 
-  const handleReport = (postId: string) => {
+  const handleReport = (_postId: string) => {
     // You can implement a proper report modal here
     toast.info('Report functionality will be implemented');
   };

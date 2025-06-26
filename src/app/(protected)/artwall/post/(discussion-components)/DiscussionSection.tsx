@@ -433,14 +433,6 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
     }
   };
 
-  const getSortLabel = (sortType: SortType) => {
-    switch (sortType) {
-      case 'top': return 'Top discussions';
-      case 'oldest': return 'Oldest first';
-      case 'replies': return 'Most replies';
-      default: return 'Newest first';
-    }
-  };
 
   const totalDiscussions = discussions.reduce((total, discussion) => total + 1 + discussion.replies_count, 0);
   const pinnedDiscussions = discussions.filter(c => c.is_pinned);

@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 export default function StartBody() {
@@ -42,7 +43,7 @@ export default function StartBody() {
                   better, and conquer quests.
                 </p>
                 {/* Start Pitching Button */}
-                <a
+                <Link
                   href="/sign-in"
                   className="mt-6 inline-flex px-8 py-2 rounded-full border-2 border-white hover:bg-white text-white hover:text-black font-semibold text-lg shadow transition items-center gap-2 w-auto"
                   role="button"
@@ -67,7 +68,7 @@ export default function StartBody() {
                       <polyline points="14 6 20 12 14 18" />
                     </svg>
                   </span>
-                </a>
+                </Link>
               </div>
             </div>
             <div className="md:col-span-1 flex justify-center py-2 relative">

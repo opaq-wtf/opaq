@@ -15,7 +15,6 @@ import {
   Code,
   Undo,
   Redo,
-  Type,
   Heading1,
   Heading2,
   Heading3

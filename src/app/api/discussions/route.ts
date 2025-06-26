@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
         // Get user interactions if authenticated
         const currentUser = await getUser();
         if (currentUser && currentUser.id) {
-            const discussionIds = discussionsWithUserInfo.map(c => c.id);
+            const discussionIds = discussionsWithUserInfo.map(c => c._id);
             const interactions = await DiscussionInteraction.find({
                 user_id: currentUser.id,
                 discussion_id: { $in: discussionIds }
@@ -116,8 +116,8 @@ export async function GET(req: NextRequest) {
             );
 
             discussionsWithUserInfo.forEach(discussion => {
-                const interaction = interactionMap.get(discussion.id);
-                discussion.user_liked = interaction?.liked || false;
+                const interaction = interactionMap.get(discussion._id);
+                (discussion as any).user_liked = interaction?.liked || false;
             });
         }
 

@@ -1,7 +1,7 @@
-import { getUser, getUserOptional } from "@/app/data/user";
+import { getUserOptional } from "@/app/data/user";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
     try {
         const user = await getUserOptional();
 

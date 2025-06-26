@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 
 // Custom hook to handle clicks outside a referenced element
@@ -30,10 +31,12 @@ export default function DashHeader() {
           <div className="flex-1 md:flex md:items-center md:gap-12">
             <a className="block text-teal-600 dark:text-teal-300" href="#">
               <span className="sr-only">Home</span>
-              <img
+              <Image
                 src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
                 alt="Home Logo"
                 className="h-8 w-auto object-cover rounded"
+                width={32}
+                height={32}
               />
             </a>
             <h1>|</h1>
@@ -57,10 +60,12 @@ export default function DashHeader() {
                 onClick={() => setMenuOpen((open) => !open)}
               >
                 <span className="sr-only">Toggle dashboard menu</span>
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt=""
                   className="size-10 object-cover"
+                  width={40}
+                  height={40}
                 />
               </button>
 

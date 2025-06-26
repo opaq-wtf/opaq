@@ -43,11 +43,13 @@ export async function POST(req: NextRequest) {
         try {
             requestData = await req.json();
         } catch (error) {
+            console.warn('Failed to parse JSON, falling back to text:', error);
             // Handle navigator.sendBeacon requests which might not be valid JSON
             const body = await req.text();
             try {
                 requestData = JSON.parse(body);
             } catch (parseError) {
+                console.error('Failed to parse request body:', parseError);
                 return NextResponse.json({ message: 'Invalid request format' }, { status: 400 });
             }
         }

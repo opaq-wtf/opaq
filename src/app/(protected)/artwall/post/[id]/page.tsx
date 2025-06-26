@@ -22,7 +22,6 @@ import {
   Flag,
   Calendar,
   Tag,
-  User,
   Eye,
   Clock
 } from 'lucide-react';
@@ -396,7 +395,7 @@ export default function PostDetailPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">📄</div>
           <h2 className="text-2xl font-bold text-gray-300 mb-2">Post not found</h2>
-          <p className="text-gray-400 mb-6">The post you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-400 mb-6">The post you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Button
             onClick={() => router.push('/artwall')}
             className="bg-blue-600 hover:bg-blue-700"

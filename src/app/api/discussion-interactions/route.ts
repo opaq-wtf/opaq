@@ -2,6 +2,7 @@ import { getUser } from "@/app/data/user";
 import MongoConnect from "@/lib/mongodb/lib/mongoose";
 import Discussions from "@/lib/mongodb/model/discussions";
 import DiscussionInteraction from "@/lib/mongodb/model/discussion-interactions";
+import Posts from "@/lib/mongodb/model/posts";
 import { NextRequest, NextResponse } from "next/server";
 
 // POST discussion interaction (like/unlike/heart)
@@ -24,12 +25,10 @@ export async function POST(req: NextRequest) {
         if (!discussion) {
             return NextResponse.json({ message: 'Discussion not found' }, { status: 404 });
         }
-
         // For heart action, verify user is the post author
         if (action === 'heart') {
             // Get the post to verify the user is the author
-            const posts = require('@/lib/mongodb/model/posts');
-            const post = await posts.findOne({ id: discussion.post_id });
+            const post = await Posts.findOne({ id: discussion.post_id });
             if (!post || post.user_id !== user.id) {
                 return NextResponse.json({ message: 'Only post author can heart discussions' }, { status: 403 });
             }

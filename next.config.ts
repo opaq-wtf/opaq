@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: "forcdn.pages.dev",
         pathname: "/assets/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      }
     ],
   },
 };

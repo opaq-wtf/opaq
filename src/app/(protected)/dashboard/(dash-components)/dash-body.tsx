@@ -1,8 +1,9 @@
 import React from "react";
 // Import shadcn UI components
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import Image from "next/image";
 
 const recentPosts = [
 	{
@@ -66,10 +67,12 @@ export default function DashBody() {
 							</div>
 						</div>
 						<div className="flex-shrink-0">
-							<img
+							<Image
 								src={post.image}
 								alt={post.title}
-								className="w-24 h-24 object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
+								className="object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
+								width={96}
+								height={96}
 							/>
 						</div>
 					</Card>

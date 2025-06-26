@@ -44,7 +44,6 @@ export default function SignIn() {
   const onSubmit: SubmitHandler<SignInForm> = async (data: SignInForm) => {
     try {
       const res = await axios.post("http://localhost:3000/auth/sign-in", data);
-      const username = res.data.username;
       if (res.status === 200) {
         toast.success(res.data.message, {
           description: "Redirecting you to your profile",

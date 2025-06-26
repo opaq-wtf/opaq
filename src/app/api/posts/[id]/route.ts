@@ -109,13 +109,15 @@ export async function PUT(
         }
 
         // Update the post
-        post.title = title?.trim() || post.title;
-        post.content = content?.trim() || post.content;
-        post.labels = labels || post.labels;
-        post.status = status || post.status;
-        post.updatedAt = new Date();
+        const updatedPost = {
+            title: title?.trim() || post.title,
+            content: content?.trim() || post.content,
+            labels: labels || post.labels,
+            status: status || post.status,
+            updatedAt: new Date()
+        };
 
-        await post.save();
+        await posts.updateOne({ id }, updatedPost);
 
         return NextResponse.json({
             message: 'Post updated successfully.',

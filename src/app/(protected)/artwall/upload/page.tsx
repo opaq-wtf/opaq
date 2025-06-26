@@ -104,8 +104,6 @@ export default function ArtWallPostEdit() {
         throw new Error(errorData.message || "Failed to save post");
       }
 
-      const result = await response.json();
-
       // Clear all draft-related data on successful save/publish
       clearAllDraftData();
 
@@ -291,7 +289,8 @@ export default function ArtWallPostEdit() {
           const strong = document.createElement('strong');
           try {
             range.surroundContents(strong);
-          } catch (e) {
+          } catch (error) {
+            console.log('Surround contents failed, inserting strong tag manually', error);
             strong.textContent = range.toString();
             range.deleteContents();
             range.insertNode(strong);
@@ -531,7 +530,7 @@ export default function ArtWallPostEdit() {
     draggedImg = e.target as HTMLImageElement;
     e.dataTransfer?.setData("text/plain", "img");
   }
-  function onImageDragEnd(e: DragEvent) {
+  function onImageDragEnd(_e: DragEvent) {
     draggedImg = null;
   }
   function onEditorDrop(e: React.DragEvent<HTMLDivElement>) {

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { Kanit } from "next/font/google";
 import { useState } from "react";
+import Link from "next/link";
 
 const kanit = Kanit({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
@@ -26,9 +27,9 @@ export default function StartNavbar() {
       >
         <div className="flex flex-col h-full p-8">
           <div className="flex items-center justify-between mb-8">
-            <a className="block" href="/">
+            <Link className="block" href="/">
               <span className="sr-only">Home</span>
-            </a>
+            </Link>
             <button
               className="rounded-full bg-gray-100 p-2 text-gray-600 dark:bg-gray-800 dark:text-white"
               aria-label="Close menu"
@@ -53,31 +54,31 @@ export default function StartNavbar() {
           <nav aria-label="Sidebar" className="flex-1">
             <ul className="flex flex-col gap-6 text-lg">
               <li>
-                <a
+                <Link
                   className="text-gray-900  hover:text-gray-500/75  transition"
                   href="/about"
                   onClick={() => setSidebarOpen(false)}
                 >
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   className="text-gray-900 dark:text-white hover:text-gray-500/75 dark:hover:text-white/75 transition"
                   href="/guidelines"
                   onClick={() => setSidebarOpen(false)}
                 >
                   Guidelines
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   className="text-gray-900 dark:text-white hover:text-gray-500/75 dark:hover:text-white/75 transition"
                   href="/reach"
                   onClick={() => setSidebarOpen(false)}
                 >
                   Reach
-                </a>
+                </Link>
               </li>
               <li>
                 <a
@@ -113,7 +114,7 @@ export default function StartNavbar() {
           {/* Main content: logo, nav, button */}
           <div className="flex flex-1 items-center justify-between gap-8 px-4">
             {/* Logo */}
-            <a className="block" href="/">
+            <Link className="block" href="/">
               <span className="sr-only">Home</span>
               <Image
                 src="/outerAsset 14opaq-ful.svg"
@@ -122,39 +123,39 @@ export default function StartNavbar() {
                 height={32}
                 priority
               />
-            </a>
+            </Link>
             {/* Nav (hidden on sm/md) */}
             <nav aria-label="Global" className="hidden lg:block">
               <ul className="flex items-center gap-6 text-md">
                 <li>
-                  <a
+                  <Link
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="/about"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="/guidelines"
                   >
                     Guidelines
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     className="text-gray-100  hover:font-bold transition-all duration-200 hover:text-gray-700 hover:bg-white hover:p-4 rounded-full"
                     href="/reach"
                   >
                     Reach
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
             {/* Button (hidden on sm/md) */}
             <div className="hidden lg:flex items-center gap-4">
-              <a
+              <Link
                 className="rounded-full bg-white px-5 py-2.5 text-md font-medium text-black shadow-sm hover:bg-transparent border-2 border-white hover:text-white transition ease-in-out duration-300 flex justify-center items-center gap-2"
                 href="/sign-in"
               >
@@ -175,7 +176,7 @@ export default function StartNavbar() {
                     />
                   </svg>
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
           {/* Right padding for pill effect */}
