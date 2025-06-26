@@ -45,7 +45,6 @@ export async function middleware(req: NextRequest) {
     "/about",
     "/guidelines",
     "/reach",
-
   ];
 
   const normalizePath = currentPath.toLowerCase();

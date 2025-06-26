@@ -33,6 +33,7 @@ export default function ArtWallPostEdit() {
   const [imgToolbar, setImgToolbar] = useState<{ x: number; y: number } | null>(null);
   const [imgProps, setImgProps] = useState<{ width?: number; align?: string; crop?: boolean }>({});
   const [hasContent, setHasContent] = useState(false);
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
 
   // Get content from editor
   const getEditorContent = useCallback(() => {
@@ -51,6 +52,12 @@ export default function ArtWallPostEdit() {
 
   // Use the editor hook for word/char counting
   const { wordCount, charCount, updateCounts } = useEditor(title, getEditorContent);
+
+  // Helper function to clear all draft data
+  const clearAllDraftData = useCallback(() => {
+    localStorage.removeItem("draft-post");
+    setIsDraftSaved(false);
+  }, []);
 
   // Form validationartwall
   const validateForm = useCallback(() => {
@@ -93,21 +100,26 @@ export default function ArtWallPostEdit() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save post");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save post");
       }
 
       const result = await response.json();
+
+      // Clear all draft-related data on successful save/publish
+      clearAllDraftData();
+
+      // Show success message
       toast.success(publish ? "Post published successfully!" : "Post saved successfully!");
 
-      // Clear draft and redirect
-      localStorage.removeItem("draft-post");
+      // Redirect to artwall after a short delay
       setTimeout(() => {
         router.push("/artwall");
       }, 1000);
 
     } catch (error) {
       console.error("Error saving post:", error);
-      toast.error("Failed to save post. Please try again.");
+      toast.error(`Failed to save post: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
@@ -117,12 +129,13 @@ export default function ArtWallPostEdit() {
   useEffect(() => {
     const autoSave = () => {
       if (title.trim() || getEditorContent().trim()) {
-        localStorage.setItem("draft-post", JSON.stringify({
+        const draftData = {
           title,
           content: getEditorContent(),
           labels,
           timestamp: Date.now()
-        }));
+        };
+        localStorage.setItem("draft-post", JSON.stringify(draftData));
         setIsDraftSaved(true);
         setTimeout(() => setIsDraftSaved(false), 2000);
       }
@@ -160,12 +173,27 @@ export default function ArtWallPostEdit() {
               // Check content after loading
               setTimeout(() => checkHasContent(), 100);
             }
+          } else {
+            // If user chooses not to load draft, clear it
+            clearAllDraftData();
           }
+        } else {
+          // Clear old drafts
+          clearAllDraftData();
         }
       } catch (error) {
         console.error("Error loading draft:", error);
+        clearAllDraftData();
       }
     }
+  }, [clearAllDraftData, checkHasContent]);
+
+  // Cleanup effect - clear drafts when component unmounts if content was successfully saved
+  useEffect(() => {
+    return () => {
+      // Only clear drafts on unmount if the component is being unmounted due to successful save/publish
+      // This is handled by the success callback in handleSubmit
+    };
   }, []);
 
   // Clear draft
@@ -173,7 +201,7 @@ export default function ArtWallPostEdit() {
     const confirmed = confirm("Are you sure you want to clear all content? This action cannot be undone.");
     if (!confirmed) return;
 
-    localStorage.removeItem("draft-post");
+    clearAllDraftData();
     setTitle("");
     setLabels("");
     if (editorRef.current) {
@@ -185,15 +213,226 @@ export default function ArtWallPostEdit() {
     toast.success("Draft cleared");
   };
 
-  // Toolbar actions (basic demo)
+  // Custom list insertion function
+  // Features:
+  // - Creates proper DOM structure for lists
+  // - Handles text selection conversion to list items
+  // - Supports both ul (bullet) and ol (numbered) lists
+  // - Works with keyboard shortcuts: Ctrl+L (bullet), Ctrl+Shift+L (numbered)
+  // - Tab/Shift+Tab for indentation/outdentation
+  // - Enter key creates new list items, double Enter exits list
+  const insertList = (type: 'ul' | 'ol') => {
+    if (!editorRef.current) return;
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
+
+    // Create the list element
+    const listElement = document.createElement(type);
+    listElement.className = type === 'ul' ? 'list-disc' : 'list-decimal';
+
+    if (selectedText.trim()) {
+      // If text is selected, convert it to list items
+      const lines = selectedText.split('\n').filter(line => line.trim());
+      lines.forEach(line => {
+        const li = document.createElement('li');
+        li.textContent = line.trim();
+        listElement.appendChild(li);
+      });
+    } else {
+      // Create a single empty list item
+      const li = document.createElement('li');
+      li.innerHTML = '&nbsp;'; // Non-breaking space to make it focusable
+      listElement.appendChild(li);
+    }
+
+    // Insert the list
+    range.deleteContents();
+    range.insertNode(listElement);
+
+    // Move cursor to the first list item
+    const firstLi = listElement.querySelector('li');
+    if (firstLi) {
+      const newRange = document.createRange();
+      newRange.setStart(firstLi, 0);
+      newRange.setEnd(firstLi, firstLi.childNodes.length);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
+
+    editorRef.current.focus();
+    checkHasContent();
+  };
+
+  // Toolbar actions
   const format = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
+    if (command === 'insertUnorderedList') {
+      insertList('ul');
+      return;
+    }
+    if (command === 'insertOrderedList') {
+      insertList('ol');
+      return;
+    }
+
+    // For other commands, try execCommand first, with fallbacks for some
+    try {
+      document.execCommand(command, false, value);
+    } catch (error) {
+      console.warn('execCommand failed for', command, error);
+      // Add manual implementations for critical commands if needed
+      if (command === 'bold') {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const strong = document.createElement('strong');
+          try {
+            range.surroundContents(strong);
+          } catch (e) {
+            strong.textContent = range.toString();
+            range.deleteContents();
+            range.insertNode(strong);
+          }
+        }
+      }
+    }
     editorRef.current?.focus();
   };
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts and list behavior
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Tab key for list indentation
+      if (e.key === 'Tab') {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const currentElement = range.startContainer.nodeType === Node.TEXT_NODE
+            ? range.startContainer.parentElement
+            : range.startContainer as Element;
+
+          const listItem = currentElement?.closest('li');
+          if (listItem) {
+            e.preventDefault();
+
+            if (e.shiftKey) {
+              // Outdent (Shift + Tab)
+              const parentList = listItem.parentElement;
+              const grandParentList = parentList?.parentElement?.closest('ul, ol');
+
+              if (grandParentList) {
+                // Move this item to the parent level
+                const parentLi = parentList?.parentElement?.closest('li');
+                if (parentLi) {
+                  grandParentList.insertBefore(listItem, parentLi.nextSibling);
+
+                  // If the nested list is now empty, remove it
+                  if (parentList && parentList.children.length === 0) {
+                    parentList.remove();
+                  }
+                }
+              }
+            } else {
+              // Indent (Tab)
+              const prevSibling = listItem.previousElementSibling as HTMLLIElement;
+              if (prevSibling) {
+                // Find or create a nested list in the previous item
+                let nestedList = prevSibling.querySelector('ul, ol') as HTMLUListElement | HTMLOListElement;
+                if (!nestedList) {
+                  const parentList = listItem.parentElement;
+                  nestedList = document.createElement(parentList?.tagName.toLowerCase() as 'ul' | 'ol');
+                  prevSibling.appendChild(nestedList);
+                }
+
+                // Move current item to nested list
+                nestedList.appendChild(listItem);
+              }
+            }
+
+            // Restore focus
+            const newRange = document.createRange();
+            newRange.setStart(listItem, 0);
+            newRange.setEnd(listItem, 0);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+            return;
+          }
+        }
+      }
+
+      // Handle list behavior with Enter key
+      if (e.key === 'Enter' && !e.shiftKey) {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const currentElement = range.startContainer.nodeType === Node.TEXT_NODE
+            ? range.startContainer.parentElement
+            : range.startContainer as Element;
+
+          // Check if we're in a list item
+          const listItem = currentElement?.closest('li');
+          const list = listItem?.parentElement;
+
+          if (listItem && list && (list.tagName === 'UL' || list.tagName === 'OL')) {
+            e.preventDefault();
+
+            // If the current list item is empty, exit the list
+            if (!listItem.textContent?.trim()) {
+              // Create a new paragraph after the list
+              const newP = document.createElement('p');
+              newP.innerHTML = '&nbsp;';
+
+              // Find the top-level list to insert after
+              let topLevelList = list;
+              while (topLevelList.parentElement?.closest('ul, ol')) {
+                topLevelList = topLevelList.parentElement.closest('ul, ol')!;
+              }
+
+              topLevelList.parentNode?.insertBefore(newP, topLevelList.nextSibling);
+
+              // Remove the empty list item
+              listItem.remove();
+
+              // If the list is now empty, remove it
+              if (list.children.length === 0) {
+                list.remove();
+              }
+
+              // Focus the new paragraph
+              const newRange = document.createRange();
+              newRange.setStart(newP, 0);
+              newRange.setEnd(newP, 0);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+
+              checkHasContent();
+              return;
+            }
+
+            // Create a new list item
+            const newLi = document.createElement('li');
+            newLi.innerHTML = '&nbsp;';
+
+            // Insert after current list item
+            listItem.parentNode?.insertBefore(newLi, listItem.nextSibling);
+
+            // Focus the new list item
+            const newRange = document.createRange();
+            newRange.setStart(newLi, 0);
+            newRange.setEnd(newLi, 0);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+            return;
+          }
+        }
+      }
+
+      // Handle other keyboard shortcuts
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case 's':
@@ -224,6 +463,12 @@ export default function ArtWallPostEdit() {
             if (editorRef.current === document.activeElement) {
               e.preventDefault();
               format('underline');
+            }
+            break;
+          case 'l':
+            if (editorRef.current === document.activeElement) {
+              e.preventDefault();
+              format(e.shiftKey ? 'insertOrderedList' : 'insertUnorderedList');
             }
             break;
           case 'z':
@@ -478,13 +723,15 @@ export default function ArtWallPostEdit() {
                   style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
                   onDrop={onEditorDrop}
                   onClick={onEditorClick}
+                  onFocus={() => setIsEditorFocused(true)}
+                  onBlur={() => setIsEditorFocused(false)}
                   onInput={() => {
                     if (errors.content) setErrors(prev => ({ ...prev, content: undefined }));
                     checkHasContent();
                     updateCounts();
                   }}
                 />
-                {!hasContent && (
+                {!hasContent && !isEditorFocused && (
                   <div className="absolute top-5 left-5 text-gray-500 pointer-events-none">
                     Write your post content here... You can add images, format text, and more!
                   </div>
@@ -546,7 +793,7 @@ export default function ArtWallPostEdit() {
               </div>
               <div className="flex justify-between">
                 <span>Reading time:</span>
-                <span>{Math.ceil(wordCount / 200)} min</span>
+                <span>~ {Math.ceil(wordCount / 200)} min</span>
               </div>
             </div>
           </div>

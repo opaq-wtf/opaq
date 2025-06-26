@@ -144,7 +144,7 @@ export function EditorToolbar({ onFormat, onImageUpload, fileInputRef, onImageCh
           size="icon"
           onClick={() => onFormat("insertUnorderedList")}
           className="h-8 w-8 text-gray-300 hover:text-white hover:bg-gray-700"
-          title="Bullet List"
+          title="Bullet List (Ctrl+L)"
         >
           <List className="w-4 h-4" />
         </Button>
@@ -153,7 +153,7 @@ export function EditorToolbar({ onFormat, onImageUpload, fileInputRef, onImageCh
           size="icon"
           onClick={() => onFormat("insertOrderedList")}
           className="h-8 w-8 text-gray-300 hover:text-white hover:bg-gray-700"
-          title="Numbered List"
+          title="Numbered List (Ctrl+Shift+L)"
         >
           <ListOrdered className="w-4 h-4" />
         </Button>
