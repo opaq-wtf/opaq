@@ -23,7 +23,7 @@ export async function GET(
 ) {
     try {
         await MongoConnect();
-        const { id } = await params;    
+        const { id } = await params;
 
         const post = await posts.findOne({ id }).lean() as unknown as Post;
 

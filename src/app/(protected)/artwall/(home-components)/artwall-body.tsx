@@ -29,6 +29,7 @@ interface PostInteraction {
   saved: boolean;
   likes: number;
   saves: number;
+  views: number;
 }
 
 export function ArtwallBody() {
@@ -100,7 +101,8 @@ export function ArtwallBody() {
           liked: false,
           saved: false,
           likes: 0,
-          saves: 0
+          saves: 0,
+          views: 0
         };
       });
 
@@ -112,7 +114,8 @@ export function ArtwallBody() {
           liked: result.liked || false,
           saved: result.saved || false,
           likes: result.likes || 0,
-          saves: result.saves || 0
+          saves: result.saves || 0,
+          views: result.views || 0
         };
       });
 
@@ -272,23 +275,7 @@ export function ArtwallBody() {
 
   // Navigate to full post
   const handlePostClick = async (postId: string) => {
-    // Track view
-    try {
-      await fetch('/api/interactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: 'view',
-          value: true
-        }),
-      });
-    } catch (error) {
-      console.error('Error tracking view:', error);
-    }
-
+    // Navigate to post page - view tracking will be handled by the individual post page
     router.push(`/artwall/post/${postId}`);
   };
 
@@ -382,7 +369,7 @@ export function ArtwallBody() {
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <span>{formatDate(post.createdAt)}</span>
                   <span>•</span>
-                  <span>{Math.floor(Math.random() * 100) + 10} views</span>
+                  <span>{interactions[post.id]?.views || 0} views</span>
                 </div>
               </div>
             </div>

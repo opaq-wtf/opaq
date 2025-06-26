@@ -1,3 +1,32 @@
+/*
+ * Enhanced View Tracking System
+ *
+ * This API endpoint handles user interactions with posts, including an intelligent view tracking system
+ * that only counts meaningful engagement with content.
+ *
+ * VIEW TRACKING LOGIC:
+ * - Views are only counted when users demonstrate genuine engagement with a post
+ * - A view is qualified based on time spent reading (calculated from content length)
+ * - Minimum view time: 15 seconds or 20% of estimated reading time (whichever is higher)
+ * - Maximum threshold: 45 seconds for very long posts
+ *
+ * TRACKING TRIGGERS:
+ * 1. Time-based: After user spends minimum time on post
+ * 2. Scroll-based: When user scrolls significantly (150px+) after 8+ seconds
+ * 3. Visibility-based: When user switches tabs after adequate reading time
+ * 4. Navigation-based: When user navigates away after sufficient engagement
+ *
+ * ANTI-SPAM MEASURES:
+ * - Users can only increment view count once per 24 hours per post
+ * - Return visits after 24 hours are counted to track loyal readership
+ * - Random number generation has been replaced with actual database values
+ *
+ * SIMILARITY TO LIKES/SAVES:
+ * - Like likes and saves, views are tracked per user per post
+ * - Each interaction creates/updates a record in UserInteraction collection
+ * - Aggregated stats are calculated in real-time for display
+ */
+
 import { getUser } from "@/app/data/user";
 import MongoConnect from "@/lib/mongodb/lib/mongoose";
 import UserInteraction from "@/lib/mongodb/model/user-interactions";
@@ -7,7 +36,22 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {
         await MongoConnect();
-        const { post_id, action, value } = await req.json();
+
+        // Handle both JSON and beacon requests
+        let requestData;
+        try {
+            requestData = await req.json();
+        } catch (error) {
+            // Handle navigator.sendBeacon requests which might not be valid JSON
+            const body = await req.text();
+            try {
+                requestData = JSON.parse(body);
+            } catch (parseError) {
+                return NextResponse.json({ message: 'Invalid request format' }, { status: 400 });
+            }
+        }
+
+        const { post_id, action, value } = requestData;
 
         const user = await getUser();
         if (!user || !user.id) {
@@ -52,9 +96,21 @@ export async function POST(req: NextRequest) {
                 }
                 break;
             case 'view':
-                interaction.viewed = true;
-                interaction.view_count += 1;
-                interaction.last_viewed = new Date();
+                // Only increment view count for qualified views
+                // A view is qualified if:
+                // 1. User hasn't viewed this post before, OR
+                // 2. It's been more than 24 hours since their last view (to count return visits)
+
+                const now = new Date();
+                const shouldIncrementView = !interaction.viewed ||
+                    (interaction.last_viewed &&
+                        now.getTime() - interaction.last_viewed.getTime() > 24 * 60 * 60 * 1000);
+
+                if (shouldIncrementView) {
+                    interaction.viewed = true;
+                    interaction.view_count += 1;
+                    interaction.last_viewed = now;
+                }
                 break;
             default:
                 return NextResponse.json({ message: 'Invalid action' }, { status: 400 });

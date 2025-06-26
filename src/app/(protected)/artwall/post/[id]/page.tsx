@@ -1,5 +1,14 @@
 "use client";
 
+/*
+ * Enhanced View Tracking System:
+ * - Views are only counted when users spend meaningful time reading the post
+ * - Minimum view time is calculated based on post length (20% of estimated reading time, min 15 seconds)
+ * - Views are tracked through multiple engagement signals: time spent, scrolling, and page visibility
+ * - Users can only increment view count once per 24 hours to prevent spam while counting return visits
+ * - Similar to likes/saves system but with time-based qualification
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -40,6 +49,7 @@ interface PostInteraction {
   saved: boolean;
   likes: number;
   saves: number;
+  views: number;
 }
 
 export default function PostDetailPage() {
@@ -51,8 +61,11 @@ export default function PostDetailPage() {
     liked: false,
     saved: false,
     likes: 0,
-    saves: 0
+    saves: 0,
+    views: 0
   });
+  const [viewTracked, setViewTracked] = useState(false);
+  const [startTime, setStartTime] = useState<number>(0);
 
   const postId = params.id as string;
 
@@ -78,6 +91,36 @@ export default function PostDetailPage() {
     return readingTime;
   };
 
+  // Calculate minimum viewing time based on content
+  const calculateMinViewTime = (content: string) => {
+    const readingTime = calculateReadingTime(content);
+    // Minimum view time should be at least 15 seconds, or 20% of estimated reading time
+    const minTime = Math.max(15000, (readingTime * 60 * 1000) * 0.2); // 20% of reading time in milliseconds
+    return Math.min(minTime, 45000); // Cap at 45 seconds for very long posts
+  };
+
+  // Track qualified view based on time spent
+  const trackView = async () => {
+    if (!post || viewTracked) return;
+
+    try {
+      await fetch('/api/interactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: postId,
+          action: 'view',
+          value: true
+        }),
+      });
+      setViewTracked(true);
+    } catch (error) {
+      console.error('Error tracking view:', error);
+    }
+  };
+
   // Fetch post by ID
   const fetchPost = async () => {
     try {
@@ -90,6 +133,7 @@ export default function PostDetailPage() {
 
       const data = await response.json();
       setPost(data.post);
+      setStartTime(Date.now()); // Record when user started viewing the post
 
       // Fetch interaction data
       const interactionResponse = await fetch(`/api/interactions?post_id=${postId}`);
@@ -99,22 +143,12 @@ export default function PostDetailPage() {
           liked: interactionData.user_interaction.liked,
           saved: interactionData.user_interaction.saved,
           likes: interactionData.stats.likes,
-          saves: interactionData.stats.saves
+          saves: interactionData.stats.saves,
+          views: interactionData.stats.views
         });
       }
 
-      // Track view
-      await fetch('/api/interactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: 'view',
-          value: true
-        }),
-      });
+      // Note: View tracking is now handled by the time-based system below
 
     } catch (error) {
       console.error('Error fetching post:', error);
@@ -159,7 +193,8 @@ export default function PostDetailPage() {
       setInteraction(prev => ({
         ...prev,
         liked: result.interaction.liked,
-        likes: result.stats.likes
+        likes: result.stats.likes,
+        views: result.stats.views
       }));
 
       toast.success(newLikedState ? 'Added to likes' : 'Removed from likes');
@@ -208,7 +243,8 @@ export default function PostDetailPage() {
       setInteraction(prev => ({
         ...prev,
         saved: result.interaction.saved,
-        saves: result.stats.saves
+        saves: result.stats.saves,
+        views: result.stats.views
       }));
 
       toast.success(newSavedState ? 'Post saved' : 'Removed from saved posts');
@@ -253,6 +289,77 @@ export default function PostDetailPage() {
       fetchPost();
     }
   }, [postId]);
+
+  // Time-based view tracking
+  useEffect(() => {
+    if (!post || viewTracked || startTime === 0) return;
+
+    const minViewTime = calculateMinViewTime(post.content);
+
+    const timer = setTimeout(() => {
+      const timeSpent = Date.now() - startTime;
+      if (timeSpent >= minViewTime) {
+        trackView();
+      }
+    }, minViewTime);
+
+    // Also track view when user scrolls significantly or interacts with the page
+    let hasScrolled = false;
+    const handleScroll = () => {
+      if (!hasScrolled && window.scrollY > 150) { // Scrolled more than 150px (shows engagement)
+        hasScrolled = true;
+        const timeSpent = Date.now() - startTime;
+        if (timeSpent >= 8000) { // At least 8 seconds spent reading
+          trackView();
+        }
+      }
+    };
+
+    // Track view on page visibility change (user switches tabs/comes back)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        const timeSpent = Date.now() - startTime;
+        const minViewTime = calculateMinViewTime(post.content);
+        // Track if user spent reasonable time reading (at least 12 seconds or calculated min time)
+        if (timeSpent >= Math.max(minViewTime, 12000)) {
+          trackView();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [post, viewTracked, startTime]);
+
+  // Track view when component unmounts (user navigates away)
+  useEffect(() => {
+    return () => {
+      if (post && !viewTracked && startTime > 0) {
+        const timeSpent = Date.now() - startTime;
+        const minViewTime = calculateMinViewTime(post.content);
+        // Track if user spent adequate time reading (at least 8 seconds or calculated min time)
+        if (timeSpent >= Math.max(minViewTime, 8000)) {
+          // Use navigator.sendBeacon for reliable tracking on page unload
+          if (navigator.sendBeacon) {
+            const blob = new Blob([JSON.stringify({
+              post_id: postId,
+              action: 'view',
+              value: true
+            })], { type: 'application/json' });
+            navigator.sendBeacon('/api/interactions', blob);
+          } else {
+            trackView();
+          }
+        }
+      }
+    };
+  }, [post, viewTracked, startTime, postId]);
 
   if (loading) {
     return (
@@ -395,7 +502,7 @@ export default function PostDetailPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="w-4 h-4" />
-                    <span>{Math.floor(Math.random() * 100) + 50} views</span>
+                    <span>{interaction.views} views</span>
                   </div>
                 </div>
               </div>
