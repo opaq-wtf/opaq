@@ -23,16 +23,16 @@ export async function encrypt(payload: any) {
 }
 
 export async function decrypt(session: any) {
-  if (typeof session !== 'string') return null;
+  if (typeof session !== "string") return null;
 
   try {
     const { payload } = await jwtVerify(session, secret, {
-      algorithms: ['HS256'],
+      algorithms: ["HS256"],
     });
 
     return payload;
   } catch (error) {
-    console.error('Sesssion decryption failed: ', error);
+    console.error("Sesssion decryption failed: ", error);
     return null;
   }
 }

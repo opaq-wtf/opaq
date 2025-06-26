@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "OPAQ",
-  description: "A platform for developers, researchers, budding entrepreneurs and many others to ideate, share and connect with like-minded individuals.",
+  description:
+    "A platform for developers, researchers, budding entrepreneurs and many others to ideate, share and connect with like-minded individuals.",
 };
 
 export default function RootLayout({
