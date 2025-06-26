@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Share2, Bookmark, Flag, Eye, Calendar, Tag, User } from 'lucide-react';
+import { Heart, Share2, Bookmark, Flag, Tag, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -30,6 +30,7 @@ interface PostInteraction {
   likes: number;
   saves: number;
   views: number;
+  comments: number;
 }
 
 export function ArtwallBody() {
@@ -102,7 +103,8 @@ export function ArtwallBody() {
           saved: false,
           likes: 0,
           saves: 0,
-          views: 0
+          views: 0,
+          comments: 0
         };
       });
 
@@ -115,7 +117,8 @@ export function ArtwallBody() {
           saved: result.saved || false,
           likes: result.likes || 0,
           saves: result.saves || 0,
-          views: result.views || 0
+          views: result.views || 0,
+          comments: result.comments || 0
         };
       });
 
@@ -448,6 +451,20 @@ export function ArtwallBody() {
                     }`}
                   />
                   <span className="text-sm">{interactions[post.id]?.saves || 0}</span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Navigate to post detail page where comments are displayed
+                    router.push(`/artwall/post/${post.id}`);
+                  }}
+                  className="text-gray-400 hover:text-purple-400"
+                >
+                  <MessageCircle className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{interactions[post.id]?.comments || 0}</span>
                 </Button>
 
                 <Button

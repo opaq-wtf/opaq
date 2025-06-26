@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { DiscussionItem } from './DiscussionItem';
-import { DiscussionForm } from './DiscussionForm';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MessageCircle, ChevronDown, SortAsc, Pin, TrendingUp, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import './discussions.css';
+import { DiscussionForm } from './DiscussionForm';
 
 interface Discussion {
   id: string;

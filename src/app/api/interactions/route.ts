@@ -31,6 +31,7 @@ import { getUser } from "@/app/data/user";
 import MongoConnect from "@/lib/mongodb/lib/mongoose";
 import UserInteraction from "@/lib/mongodb/model/user-interactions";
 import posts from "@/lib/mongodb/model/posts";
+import Discussions from "@/lib/mongodb/model/discussions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -132,7 +133,11 @@ export async function POST(req: NextRequest) {
             }
         ]);
 
+        // Get comment count from discussions
+        const commentCount = await Discussions.countDocuments({ post_id: post_id });
+
         const postStats = stats[0] || { likes: 0, saves: 0, views: 0 };
+        postStats.comments = commentCount;
 
         return NextResponse.json({
             message: 'Interaction updated successfully',
@@ -173,7 +178,11 @@ export async function GET(req: NextRequest) {
                 }
             ]);
 
+            // Get comment count from discussions
+            const commentCount = await Discussions.countDocuments({ post_id: post_id });
+
             const postStats = stats[0] || { likes: 0, saves: 0, views: 0 };
+            postStats.comments = commentCount;
 
             // If user is authenticated, get their specific interaction
             let userInteraction = null;
