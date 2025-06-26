@@ -254,7 +254,7 @@ export default function SignIn() {
                     disabled={isSubmitting}
                     type="submit"
                   >
-                    {isSubmitting ? "Singing In" : "Sign In"}
+                    {isSubmitting ? "Signing In" : "Sign In"}
                   </button>
                 </div>
               </form>

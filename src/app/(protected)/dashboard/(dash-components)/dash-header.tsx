@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { logout } from "@/actions/logout";
 
 // Custom hook to handle clicks outside a referenced element
 function useClickOutside(
@@ -91,7 +92,7 @@ export default function DashHeader() {
                     >
                       settings
                     </a>
-                    <form method="POST" action="#">
+                    <form action={ logout }>
                       <button
                         type="submit"
                         className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-600/10"
