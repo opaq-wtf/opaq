@@ -469,9 +469,7 @@ export function ArtwallBody() {
                       interactions[post.id]?.saved ? "fill-current" : ""
                     }`}
                   />
-                  <span className="text-sm">
-                    {interactions[post.id]?.saves || 0}
-                  </span>
+                  <span className="text-sm">{interactions[post.id]?.saves || 0}</span>
                 </Button>
 
                 <Button
