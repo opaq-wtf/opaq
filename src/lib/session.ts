@@ -28,7 +28,8 @@ export async function decrypt(session: any) {
       algorithms: ["HS256"],
     });
     return payload;
-  } catch {
+  } catch (error) {
+    console.error("Session decryption failed:", error);
     return null;
   }
 }
@@ -48,7 +49,7 @@ export async function verifySession() {
   const seshcookie = (await cookies()).get(cookie.name)?.value;
   const session = await decrypt(seshcookie);
   if (!session?.userId) {
-    redirect("/start");
+    redirect("/");
   }
 
   return { userId: session.userId };
@@ -57,4 +58,10 @@ export async function verifySession() {
 export async function deleteSession() {
   (await cookies()).delete(cookie.name);
   redirect("/sign-in");
+}
+
+export async function getSession() {
+  const seshcookie = (await cookies()).get(cookie.name)?.value;
+  const session = await decrypt(seshcookie);
+  return session?.userId ? { userId: session.userId } : null;
 }

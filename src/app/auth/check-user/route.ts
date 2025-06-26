@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
   const { username }: UsernameData = await req.json();
 
   try {
-    const result = await db.select({ username: users.username })
+    const result = await db
+      .select({ username: users.username })
       .from(users)
       .where(eq(users.username, username))
       .limit(1);
