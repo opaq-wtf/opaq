@@ -30,7 +30,13 @@ export async function middleware(req: NextRequest) {
 
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/home"]; // Need to create the dashboard route
+  const protectedRoutes = ["/home",  "/wallet",
+    "/home",
+    "/bloom",
+    "/dashboard",
+    '/artwall/upload',
+    "/artwall",
+  ];
   const publicRoutes = [
     "/",
     "/sign-in",
@@ -39,12 +45,7 @@ export async function middleware(req: NextRequest) {
     "/about",
     "/guidelines",
     "/reach",
-    "/wallet",
-    "/home",
-    "/bloom",
-    "/dashboard",
-    '/artwall/upload',
-    "/artwall",
+   
   ];
 
   const normalizePath = currentPath.toLowerCase();
