@@ -52,6 +52,7 @@ export default function Profile() {
 
         setUsers(res.data.data.userByUsername);
       } catch (err) {
+        console.error("Error fetching users:", err);
         setError(
           err instanceof Error ? err.message : "Failed to fetch users data.",
         );

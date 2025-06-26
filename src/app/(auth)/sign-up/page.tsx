@@ -9,7 +9,6 @@ import { Toaster, toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const formSchema = z.object({
@@ -55,7 +54,7 @@ export default function SignUp() {
       } catch {
         setIsUsername(false);
       }
-    }, 1500);
+    }, 500);
 
     return () => clearTimeout(handler);
   }, [username]);
@@ -64,8 +63,8 @@ export default function SignUp() {
     try {
       const res = await axios.post("http://localhost:3000/auth/sign-up", data);
       if (res.status === 201) {
-        toast.success(res.data.message, {
-          description: "You will be redirected",
+        toast.success("Please verify your mail.", {
+          description: 'Your  account will be deleted if you do not verify within 7 days.',
           action: {
             label: "Close",
             onClick: () => {
@@ -73,7 +72,6 @@ export default function SignUp() {
             },
           },
         });
-        setTimeout(() => redirect("/sign-in"), 2000);
       }
     } catch (error: any) {
       if (error.response) {

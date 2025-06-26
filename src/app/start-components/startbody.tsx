@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 
 export default function StartBody() {
@@ -70,10 +71,13 @@ export default function StartBody() {
               </div>
             </div>
             <div className="md:col-span-1 flex justify-center py-2 relative">
-              <img
+              <Image
                 src="https://forcdn.pages.dev/assets/eyes-grey.gif"
                 className="rounded-xl shadow-lg max-h-96"
                 alt="Animated eyes"
+                width={400}
+                height={400}
+                unoptimized
                 style={{ display: "block" }}
               />
             </div>
