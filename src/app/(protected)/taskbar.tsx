@@ -43,7 +43,7 @@ export function Taskbar() {
                     <button
                         type="button"
                         aria-label={collapsed ? "Expand taskbar" : "Collapse taskbar"}
-                        className="bg-gray-700 rounded-full p-1 shadow-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="bg-gray-700 rounded-full p-1 shadow-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 h-10 w-10 flex items-center justify-center"
                         onClick={() => {
                             setCollapsed((c) => {
                                 setManuallyCollapsed(!c ? true : false);
