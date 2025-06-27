@@ -26,19 +26,19 @@ export default function HomeNav() {
       <div className="mx-auto max-w-screen-xl px-2 sm:px-6 lg:px-8">
         <div className="flex h-18 items-center justify-between">
           <div className="flex-1 md:flex md:items-center md:gap-12">
-            <a className="block text-teal-600 dark:text-teal-300 flex flex-col items-start" href="#">
+            <a className="block text-teal-600 dark:text-teal-300 flex flex-col items-start" href="/home">
               <span className="sr-only">Home</span>
               <img
                 src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
                 alt="Home Logo"
                 className="h-8 w-auto object-cover rounded"
               />
-              <h1
+              {/* <h1 id="title"
                 className="text-md text-white font-medium mt-1"
                 style={{ fontFamily: "'Kanit', sans-serif" }}
               >
-                Artwall
-              </h1>
+                home
+              </h1> */}
             </a>
             <link
               href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap"
