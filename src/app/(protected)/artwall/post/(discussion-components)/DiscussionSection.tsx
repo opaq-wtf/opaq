@@ -8,6 +8,7 @@ import { MessageCircle, ChevronDown, SortAsc, Pin, TrendingUp, Clock, Users } fr
 import { toast } from 'sonner';
 import './discussions.css';
 import { DiscussionForm } from './DiscussionForm';
+import axios from 'axios';
 
 interface Discussion {
   id: string;
@@ -54,13 +55,8 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
   // Fetch discussions
   const fetchDiscussions = async (pageNum: number = 1, append: boolean = false) => {
     try {
-      const response = await fetch(`/api/discussions?post_id=${postId}&sort=${sortBy}&page=${pageNum}&limit=20`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch discussions');
-      }
-
-      const data = await response.json();
+      const response = await axios.get(`/api/discussions?post_id=${postId}&sort=${sortBy}&page=${pageNum}&limit=20`);
+      const data = response.data;
 
       if (append) {
         setDiscussions(prev => [...prev, ...data.discussions]);
@@ -81,13 +77,8 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
   // Fetch replies for a discussion
   const fetchReplies = async (discussionId: string) => {
     try {
-      const response = await fetch(`/api/discussions?post_id=${postId}&parent_id=${discussionId}&sort=oldest`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch replies');
-      }
-
-      const data = await response.json();
+      const response = await axios.get(`/api/discussions?post_id=${postId}&parent_id=${discussionId}&sort=oldest`);
+      const data = response.data;
       setReplies(prev => ({
         ...prev,
         [discussionId]: data.discussions
@@ -103,24 +94,13 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
   const handleDiscussionSubmit = async (content: string, parentId?: string) => {
     setSubmitting(true);
     try {
-      const response = await fetch('/api/discussions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          content,
-          parent_id: parentId
-        }),
+      const response = await axios.post('/api/discussions', {
+        post_id: postId,
+        content,
+        parent_id: parentId
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to post discussion');
-      }
-
-      const result = await response.json();
+      const result = response.data;
 
       if (parentId) {
         // Add to replies
@@ -146,9 +126,10 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
       setReplyingTo(null);
       toast.success('Discussion posted successfully!');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error posting discussion:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to post discussion');
+      const errorMessage = error.response?.data?.message || 'Failed to post discussion';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setSubmitting(false);
@@ -160,21 +141,10 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
     if (!editingDiscussion || !editContent.trim()) return;
 
     try {
-      const response = await fetch('/api/discussions', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          discussion_id: editingDiscussion.id,
-          content: editContent
-        }),
+      const response = await axios.put('/api/discussions', {
+        discussion_id: editingDiscussion.id,
+        content: editContent
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update discussion');
-      }
 
       // Update discussion in state
       const updateDiscussion = (discussion: Discussion) =>
@@ -197,9 +167,10 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
       setEditContent('');
       toast.success('Discussion updated successfully!');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating discussion:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update discussion');
+      const errorMessage = error.response?.data?.message || 'Failed to update discussion';
+      toast.error(errorMessage);
     }
   };
 
@@ -208,14 +179,7 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
     if (!confirm('Are you sure you want to delete this discussion?')) return;
 
     try {
-      const response = await fetch(`/api/discussions?discussion_id=${discussionId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete discussion');
-      }
+      const response = await axios.delete(`/api/discussions?discussion_id=${discussionId}`);
 
       // Remove from discussions
       setDiscussions(prev => prev.filter(discussion => discussion.id !== discussionId));
@@ -231,9 +195,10 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
 
       toast.success('Discussion deleted successfully!');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting discussion:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete discussion');
+      const errorMessage = error.response?.data?.message || 'Failed to delete discussion';
+      toast.error(errorMessage);
     }
   };
 
@@ -276,21 +241,11 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
         return newReplies;
       });
 
-      const response = await fetch('/api/discussion-interactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          discussion_id: discussionId,
-          action: 'like',
-          value: newLikedState
-        }),
+      const response = await axios.post('/api/discussion-interactions', {
+        discussion_id: discussionId,
+        action: 'like',
+        value: newLikedState
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to update like');
-      }
 
     } catch (error) {
       console.error('Error updating like:', error);
@@ -325,21 +280,11 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
       const discussion = discussions.find(c => c.id === discussionId);
       if (!discussion) return;
 
-      const response = await fetch('/api/discussions', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          discussion_id: discussionId,
-          action: 'pin',
-          value: !discussion.is_pinned
-        }),
+      const response = await axios.put('/api/discussions', {
+        discussion_id: discussionId,
+        action: 'pin',
+        value: !discussion.is_pinned
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to pin discussion');
-      }
 
       // Update discussion in state
       setDiscussions(prev => prev.map(c =>
@@ -360,21 +305,11 @@ export function DiscussionSection({ postId, postAuthorId, currentUserId }: Discu
     if (currentUserId !== postAuthorId) return; // Only post author can heart
 
     try {
-      const response = await fetch('/api/discussion-interactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          discussion_id: discussionId,
-          action: 'heart',
-          value: true
-        }),
+      const response = await axios.post('/api/discussion-interactions', {
+        discussion_id: discussionId,
+        action: 'heart',
+        value: true
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to heart discussion');
-      }
 
       // Update discussion in state
       const updateHeart = (discussion: Discussion) =>

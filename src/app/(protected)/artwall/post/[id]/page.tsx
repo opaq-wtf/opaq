@@ -26,6 +26,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import axios from 'axios';
 
 interface Post {
   _id: string;
@@ -105,16 +106,10 @@ export default function PostDetailPage() {
     if (!post || viewTracked) return;
 
     try {
-      await fetch("/api/interactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: "view",
-          value: true,
-        }),
+      await axios.post("/api/interactions", {
+        post_id: postId,
+        action: "view",
+        value: true,
       });
       setViewTracked(true);
     } catch (error) {
@@ -126,13 +121,8 @@ export default function PostDetailPage() {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/posts/${postId}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch post");
-      }
-
-      const data = await response.json();
+      const response = await axios.get(`/api/posts/${postId}`);
+      const data = response.data;
       setPost(data.post);
       setStartTime(Date.now()); // Record when user started viewing the post
 
@@ -141,11 +131,9 @@ export default function PostDetailPage() {
       try {
         // For now, we'll extract user ID from the session or make an API call
         // This is a placeholder - you'll need to implement based on your auth system
-        const userResponse = await fetch('/api/auth/me');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setCurrentUser({ id: userData.id, username: userData.username });
-        }
+        const userResponse = await axios.get('/api/auth/me');
+        const userData = userResponse.data;
+        setCurrentUser({ id: userData.id, username: userData.username });
       } catch (userError) {
         console.warn('Could not fetch current user:', userError);
         // Set a fallback or handle gracefully
@@ -153,11 +141,9 @@ export default function PostDetailPage() {
       }
 
       // Fetch interaction data
-      const interactionResponse = await fetch(
-        `/api/interactions?post_id=${postId}`,
-      );
-      if (interactionResponse.ok) {
-        const interactionData = await interactionResponse.json();
+      try {
+        const interactionResponse = await axios.get(`/api/interactions?post_id=${postId}`);
+        const interactionData = interactionResponse.data;
         setInteraction({
           liked: interactionData.user_interaction.liked,
           saved: interactionData.user_interaction.saved,
@@ -165,6 +151,9 @@ export default function PostDetailPage() {
           saves: interactionData.stats.saves,
           views: interactionData.stats.views,
         });
+      } catch (interactionError) {
+        console.warn('Could not fetch interaction data:', interactionError);
+        // Keep default interaction state
       }
 
       // Note: View tracking is now handled by the time-based system below
@@ -189,23 +178,13 @@ export default function PostDetailPage() {
     }));
 
     try {
-      const response = await fetch("/api/interactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: "like",
-          value: newLikedState,
-        }),
+      const response = await axios.post("/api/interactions", {
+        post_id: postId,
+        action: "like",
+        value: newLikedState,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update like");
-      }
-
-      const result = await response.json();
+      const result = response.data;
 
       // Update with real data from server
       setInteraction((prev) => ({
@@ -239,23 +218,13 @@ export default function PostDetailPage() {
     }));
 
     try {
-      const response = await fetch("/api/interactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: "save",
-          value: newSavedState,
-        }),
+      const response = await axios.post("/api/interactions", {
+        post_id: postId,
+        action: "save",
+        value: newSavedState,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update save");
-      }
-
-      const result = await response.json();
+      const result = response.data;
 
       // Update with real data from server
       setInteraction((prev) => ({
@@ -379,7 +348,12 @@ export default function PostDetailPage() {
             );
             navigator.sendBeacon("/api/interactions", blob);
           } else {
-            trackView();
+            // Fallback to axios for environments without sendBeacon
+            axios.post("/api/interactions", {
+              post_id: postId,
+              action: "view",
+              value: true,
+            }).catch(console.error);
           }
         }
       }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Share2, Bookmark, Flag, Tag, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 interface Post {
   _id: string;
@@ -70,15 +71,11 @@ export function ArtwallBody() {
   const fetchPosts = async (pageNum: number = 1, append: boolean = false) => {
     try {
       setLoading(true);
-      const response = await fetch(
+      const response = await axios.get(
         `/api/posts?status=Published&page=${pageNum}&limit=10`,
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts");
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       if (append) {
         setPosts((prev) => [...prev, ...data.posts]);
@@ -89,29 +86,27 @@ export function ArtwallBody() {
       // Fetch interactions for each post
       const interactionPromises = data.posts.map(async (post: Post) => {
         try {
-          const interactionResponse = await fetch(
+          const interactionResponse = await axios.get(
             `/api/interactions?post_id=${post.id}`,
           );
-          if (interactionResponse.ok) {
-            const interactionData = await interactionResponse.json();
-            return {
-              postId: post.id,
-              ...interactionData.stats,
-              ...interactionData.user_interaction,
-            };
-          }
+          const interactionData = interactionResponse.data;
+          return {
+            postId: post.id,
+            ...interactionData.stats,
+            ...interactionData.user_interaction,
+          };
         } catch (error) {
           console.error("Error fetching interaction for post:", post.id, error);
+          return {
+            postId: post.id,
+            liked: false,
+            saved: false,
+            likes: 0,
+            saves: 0,
+            views: 0,
+            comments: 0
+          };
         }
-        return {
-          postId: post.id,
-          liked: false,
-          saved: false,
-          likes: 0,
-          saves: 0,
-          views: 0,
-          comments: 0
-        };
       });
 
       const interactionResults = await Promise.all(interactionPromises);
@@ -156,23 +151,13 @@ export function ArtwallBody() {
     }));
 
     try {
-      const response = await fetch("/api/interactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: "like",
-          value: newLikedState,
-        }),
+      const response = await axios.post("/api/interactions", {
+        post_id: postId,
+        action: "like",
+        value: newLikedState,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update like");
-      }
-
-      const result = await response.json();
+      const result = response.data;
 
       // Update with real data from server
       setInteractions((prev) => ({
@@ -217,23 +202,13 @@ export function ArtwallBody() {
     }));
 
     try {
-      const response = await fetch("/api/interactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          action: "save",
-          value: newSavedState,
-        }),
+      const response = await axios.post("/api/interactions", {
+        post_id: postId,
+        action: "save",
+        value: newSavedState,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update save");
-      }
-
-      const result = await response.json();
+      const result = response.data;
 
       // Update with real data from server
       setInteractions((prev) => ({

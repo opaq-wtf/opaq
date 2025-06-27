@@ -4,6 +4,7 @@
 import { decrypt } from "@/lib/session";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import axios from 'axios';
 
 export async function middleware(req: NextRequest) {
   // Log IP details
@@ -22,13 +23,10 @@ export async function middleware(req: NextRequest) {
   const log = `[Access Log] - (${timeStamp}) ${path} [${method}] --> ${ip}`;
 
   if (path !== "/api/log") {
-    fetch(
+    axios.post(
       `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/log`,
-      {
-        method: "POST",
-        body: JSON.stringify({ message: log }),
-        headers: { "Content-Type": "application/json" },
-      },
+      { message: log },
+      { headers: { "Content-Type": "application/json" } }
     ).catch((e) => console.error("Log send failed: ", e));
   }
 

@@ -17,6 +17,7 @@ import { EditorToolbar } from "./components/EditorToolbar";
 import { ImageToolbar } from "./components/ImageToolbar";
 import { useEditor } from "./hooks/useEditor";
 import "./editor-styles.css";
+import axios from 'axios';
 
 export default function ArtWallPostEdit() {
   const router = useRouter();
@@ -97,26 +98,15 @@ export default function ArtWallPostEdit() {
     setIsLoading(true);
     try {
       const content = getEditorContent();
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          content,
-          labels: labels
-            .split(",")
-            .map((label) => label.trim())
-            .filter(Boolean),
-          status: publish ? "Published" : status,
-        }),
+      const response = await axios.post("/api/posts", {
+        title: title.trim(),
+        content,
+        labels: labels
+          .split(",")
+          .map((label) => label.trim())
+          .filter(Boolean),
+        status: publish ? "Published" : status,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save post");
-      }
 
       // Clear all draft-related data on successful save/publish
       clearAllDraftData();
@@ -130,11 +120,10 @@ export default function ArtWallPostEdit() {
       setTimeout(() => {
         router.push("/artwall");
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving post:", error);
-      toast.error(
-        `Failed to save post: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+      toast.error(`Failed to save post: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
