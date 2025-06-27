@@ -10,7 +10,7 @@ export default function BloomGateway() {
       {/* Upload Button */}
       <div className="mb-12">
         <Button size="lg" className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white shadow-lg" asChild>
-          <Link href="/bloom/progress">
+          <Link href="/bloom/upload">
             <Upload className="mr-2 h-5 w-5" /> Upload New Content
           </Link>
         </Button>
@@ -49,7 +49,7 @@ export default function BloomGateway() {
         </Link>
 
         {/* Pending Verifications Card */}
-        <Link href="#" className="group block h-full">
+        <Link href="/bloom/progress" className="group block h-full">
           <Card className="bg-gray-800 border-gray-700 text-white shadow-md group-hover:shadow-lg group-hover:border-orange-500 transition-all duration-300 h-full">
             <CardContent className="p-6 flex flex-col items-start justify-start gap-4">
               <Hourglass className="h-12 w-12 text-orange-400 group-hover:text-orange-300 transition-colors" />

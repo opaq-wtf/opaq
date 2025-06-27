@@ -102,7 +102,7 @@ export default function MyPitchesPage() {
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
             asChild
           >
-            <Link href="/bloom/progress" className="flex items-center gap-2">
+            <Link href="/bloom/upload" className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
               <span>Upload New Pitch</span>
             </Link>
