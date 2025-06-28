@@ -34,7 +34,6 @@ export default function UploadPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [aadhar, setAadhar] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [irysUrl, setIrysUrl] = useState<string | null>(null);
@@ -161,31 +160,55 @@ export default function UploadPage() {
       // Upload file to Irys/Arweave
       setUploadProgress(25);
 
+      // Get file extension
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+
+      // Create Irys tags including file extension
+      const irysTags = [
+        { name: "Content-Type", value: file.type },
+        { name: "File-Extension", value: fileExtension },
+        { name: "Application", value: "OPAQ-Pitches" },
+        { name: "Title", value: title },
+        ...tags.map(tag => ({ name: "Tag", value: tag }))
+      ];
+
+      console.log("Uploading with Irys tags:", irysTags);
+
       // Convert File to Buffer for Irys
       const fileBuffer = await file.arrayBuffer();
-      const receipt = await irysUploader.upload(Buffer.from(fileBuffer));
+      const receipt = await irysUploader.upload(Buffer.from(fileBuffer), {
+        tags: irysTags
+      });
 
       setUploadProgress(75);
 
       const uploadedFileUrl = `https://gateway.irys.xyz/${receipt.id}`;
       setIrysUrl(uploadedFileUrl);
-      setUploadProgress(100);
-
-      // Create pitch data with Irys URL
+      setUploadProgress(100);      // Create pitch data with Irys URL
       const pitchData = {
         title,
         description,
         fileUrl: uploadedFileUrl,
         irysId: receipt.id,
         tags,
-        aadhar,
-        uploadedAt: new Date().toISOString(),
       };
 
       console.log("Pitch submitted with Irys:", pitchData);
 
-      // Here you would typically send pitchData to your backend API
-      // await fetch('/api/pitches', { method: 'POST', body: JSON.stringify(pitchData) });
+      // Submit pitch data to backend API
+      const response = await fetch('/api/pitches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pitchData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit pitch');
+      }
 
       alert("Pitch submitted successfully with decentralized storage!");
       router.push("/bloom/my-pitches");
@@ -333,7 +356,7 @@ export default function UploadPage() {
 
               <Card className="bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-white">Categorization & Verification</CardTitle>
+                  <CardTitle className="text-white">Categorization</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
@@ -392,20 +415,6 @@ export default function UploadPage() {
                           ))}
                       </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="aadhar" className="text-gray-400 font-medium">Aadhaar Number</label>
-                    <input
-                      id="aadhar"
-                      type="text"
-                      value={aadhar}
-                      onChange={(e) => setAadhar(e.target.value)}
-                      placeholder="XXXX-XXXX-XXXX"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
-                      pattern="\d{4}-\d{4}-\d{4}"
-                      title="Enter a valid 12-digit Aadhaar number in XXXX-XXXX-XXXX format"
-                      required
-                    />
                   </div>
                 </CardContent>
               </Card>

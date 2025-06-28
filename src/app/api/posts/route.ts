@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const page = parseInt(searchParams.get("page") || "1");
 
-    let filter: any = {};
+    const filter: any = {};
 
     // Add status filter if provided
     if (status) {
