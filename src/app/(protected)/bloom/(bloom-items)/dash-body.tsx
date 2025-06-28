@@ -1,9 +1,9 @@
 import React from "react";
 // Import shadcn UI components
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
-import Image from "next/image";
+
 
 const recentPosts = [
   {
@@ -42,16 +42,16 @@ export default function DashBody() {
 			</h1>
 			<div className="w-full max-w-2xl space-y-6">
 				{recentPosts.map((post) => (
-					<Card
-						key={post.id}
-						className="flex items-center justify-between p-4 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-none rounded-lg"
-					>
-						<div className="flex-1 min-w-0 pr-4">
-							<div className="text-xl font-bold mb-1 line-clamp-1">
-								{post.title}
+					<Card key={post.id} className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-none rounded-lg">
+						<CardContent className="flex items-center p-4">
+							<div className="w-1/2 flex-shrink-0">
+								<img src={post.image} alt={post.title} className="w-24 h-24 object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900" />
 							</div>
-							<div className="text-gray-500 dark:text-gray-400 text-sm mb-2 line-clamp-2">
-								{post.description}
+							<div className="w-1/2 flex-1 min-w-0 pl-4">
+								<div className="text-xl font-bold mb-1 line-clamp-1">
+									{post.title}
+								</div>
+								<div className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">{post.description}</div>
 							</div>
 							<div className="flex items-center gap-2 mt-2">
 								<Button
@@ -65,16 +65,7 @@ export default function DashBody() {
 									{post.likes}
 								</span>
 							</div>
-						</div>
-						<div className="flex-shrink-0">
-							<Image
-								src={post.image}
-								alt={post.title}
-								className="object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
-								width={96}
-								height={96}
-							/>
-						</div>
+						</CardContent>
 					</Card>
 				))}
 			</div>
