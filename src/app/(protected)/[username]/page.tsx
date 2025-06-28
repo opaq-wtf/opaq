@@ -2,6 +2,7 @@
 
 "use client";
 
+import Loader from "@/components/common/Loader";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,7 +67,7 @@ export default function Profile() {
 
   return (
     <div className="p-6">
-      {loading && <p className="text-white">Loading profile...</p>}
+      {loading && <p className="text-white"><Loader /></p>}
       {error && <p className="text-red-500">Error: {error}</p>}
 
       {!loading && !error && users && (

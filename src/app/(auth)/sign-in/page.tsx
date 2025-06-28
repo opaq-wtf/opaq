@@ -55,7 +55,7 @@ export default function SignIn() {
           },
         });
         setTimeout(() => {
-          router.push(`/dashboard`);
+          router.push('/home');
         }, 1500);
       }
     } catch (error: any) {
