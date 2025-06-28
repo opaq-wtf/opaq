@@ -1,13 +1,29 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import axios from "axios";
 import HomeNav from "../homenav";
 import { Taskbar } from "../taskbar";
 import ArtwallBody from "./artwall-body";
-// Assuming you have shadcn/ui installed, import the Tabs components
-// If not, you'll need to install them or create your own custom Tabs component.
-// npm install @radix-ui/react-tabs
-// npx shadcn-ui@latest add tabs
+import { LikedPostsList } from "./components/LikedPostsList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ArtwallPage() {
+  const [currentUser, setCurrentUser] = useState<{ id: string; username: string } | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await axios.get("/api/auth/me");
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   return (
     <div className="min-h-screen pb-12 relative bg-black">
       <HomeNav />
@@ -43,11 +59,8 @@ export default function ArtwallPage() {
             <TabsContent value="my-posts">
               <ArtwallBody />
             </TabsContent>
-            <TabsContent value="liked-posts" className="text-gray-400 pt-4">
-              {/* Content for Liked Posts will go here. */}
-              <div className="flex items-center justify-center min-h-[200px] border border-gray-700 rounded-lg p-4">
-                <p>Content for Liked Posts will go here.</p>
-              </div>
+            <TabsContent value="liked-posts" className="pt-4">
+              <LikedPostsList currentUserId={currentUser?.id} />
             </TabsContent>
             <TabsContent value="followers" className="text-gray-400 pt-4">
               {/* Content for Followers will go here. */}

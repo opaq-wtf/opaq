@@ -333,7 +333,6 @@ export async function GET(req: NextRequest) {
     if (user_id && user && user.id === user_id) {
       // Get user's interactions (saved posts, liked posts)
       const interactions = await UserInteraction.find({ user_id: user_id })
-        .populate("post_id")
         .sort({ updated_at: -1 });
 
       return NextResponse.json({ interactions }, { status: 200 });
