@@ -24,6 +24,7 @@ const eslintConfig = [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "@next/next/no-page-custom-font": "off",
     },
   },
 ];

@@ -116,13 +116,7 @@ export async function PUT(
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 
-    // Update the post
-    post.title = title?.trim() || post.title;
-    post.content = content?.trim() || post.content;
-    post.labels = labels || post.labels;
-    post.status = status || post.status;
-    post.updatedAt = new Date();
-    // Update the post
+    // Create updated post object
     const updatedPost = {
       title: title?.trim() || post.title,
       content: content?.trim() || post.content,
@@ -131,7 +125,7 @@ export async function PUT(
       updatedAt: new Date()
     };
 
-    await post.save();
+    // Update the post in the database
     await posts.updateOne({ id }, updatedPost);
 
     return NextResponse.json(

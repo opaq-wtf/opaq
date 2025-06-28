@@ -98,7 +98,7 @@ export default function ArtWallPostEdit() {
     setIsLoading(true);
     try {
       const content = getEditorContent();
-      const response = await axios.post("/api/posts", {
+      const _response = await axios.post("/api/posts", {
         title: title.trim(),
         content,
         labels: labels
