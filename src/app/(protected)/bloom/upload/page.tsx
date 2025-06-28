@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Upload, ArrowLeft, Loader2, X } from "lucide-react";
+import Image from "next/image";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -124,7 +125,7 @@ export default function UploadPage() {
             Create a New Pitch
           </h1>
         </div>
-        
+
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -183,20 +184,23 @@ export default function UploadPage() {
                       required
                     />
                     {filePreview ? (
-                      <img
+                      <div className="relative h-48 w-full">
+                      <Image
                         src={filePreview}
                         alt="File preview"
-                        className="max-h-48 mx-auto rounded-lg object-contain"
+                        fill
+                        className="mx-auto rounded-lg object-contain"
                       />
+                      </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-gray-500">
-                        <Upload className="h-10 w-10" />
-                        <p className="font-semibold">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs">
-                          PNG, JPG, GIF, or MP4 (MAX. 800x400px)
-                        </p>
+                      <Upload className="h-10 w-10" />
+                      <p className="font-semibold">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-xs">
+                        PNG, JPG, GIF, or MP4 (MAX. 800x400px)
+                      </p>
                       </div>
                     )}
                   </div>

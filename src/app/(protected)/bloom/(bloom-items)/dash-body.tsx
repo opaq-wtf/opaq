@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import Image from "next/image";
 
 
 const recentPosts = [
@@ -45,7 +46,13 @@ export default function DashBody() {
 					<Card key={post.id} className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-none rounded-lg">
 						<CardContent className="flex items-center p-4">
 							<div className="w-1/2 flex-shrink-0">
-								<img src={post.image} alt={post.title} className="w-24 h-24 object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900" />
+								<Image
+									src={post.image}
+									alt={post.title}
+									width={96}
+									height={96}
+									className="object-cover rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
+								/>
 							</div>
 							<div className="w-1/2 flex-1 min-w-0 pl-4">
 								<div className="text-xl font-bold mb-1 line-clamp-1">

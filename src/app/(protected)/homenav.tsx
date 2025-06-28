@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
 // Custom hook to handle clicks outside a referenced element
@@ -27,22 +28,16 @@ export default function HomeNav() {
       <div className="mx-auto max-w-screen-xl px-2 sm:px-6 lg:px-8">
         <div className="flex h-18 items-center justify-between">
           <div className="flex-1 md:flex md:items-center md:gap-12">
-            <a className="block text-teal-600 dark:text-teal-300 flex flex-col items-start" href="/home">
+            <Link href="/home" className="text-teal-600 dark:text-teal-300 flex flex-col items-start">
               <span className="sr-only">Home</span>
               <Image
-                src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
-                alt="Home Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto object-cover rounded"
+              src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
+              alt="Home Logo"
+              width={32}
+              height={32}
+              className="h-8 w-auto object-cover rounded"
               />
-              {/* <h1 id="title"
-                className="text-md text-white font-medium mt-1"
-                style={{ fontFamily: "'Kanit', sans-serif" }}
-              >
-                home
-              </h1> */}
-            </a>
+            </Link>
             <link
               href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap"
               rel="stylesheet"

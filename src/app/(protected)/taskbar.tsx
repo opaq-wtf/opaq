@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export function Taskbar() {
     const pathname = usePathname();
@@ -27,7 +28,7 @@ export function Taskbar() {
                     <div className="flex flex-row gap-2 w-full sm:w-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 justify-center">
                         {/* Feed Button */}
                         <div className="relative group"> {/* Home Button */}
-                            <a href="/home" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-blue-100 px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/home' ? 'sm:w-36' : ''}`}>
+                            <Link href="/home" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-blue-100 px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/home' ? 'sm:w-36' : ''}`}>
                                 <span className="flex justify-center items-center w-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -35,11 +36,11 @@ export function Taskbar() {
                                     </svg>
                                 </span>
                                 <span className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === '/home' ? 'sm:opacity-100' : ''}`}>Home</span>
-                            </a>
+                            </Link>
                         </div>
                         {/* artwall Button */}
-                        <div className="relative group">
-                            <a href="/artwall" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/artwall' ? 'sm:w-36' : ''}`}>
+                        <div className="relative group"></div>
+                            <Link href="/artwall" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/artwall' ? 'sm:w-36' : ''}`}>
                                 <span className="flex justify-center items-center w-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="3" width="7" height="7" rx="2" className="fill-current text-green-400" />
@@ -49,11 +50,11 @@ export function Taskbar() {
                                     </svg>
                                 </span>
                                 <span className={`whitespace-nowrap text-white opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === '/artwall' ? 'sm:opacity-100' : ''}`}>Artwall</span>
-                            </a>
+                            </Link>
                         </div>
                         {/* Flower Button */}
                         <div className="relative group"> {/* Bloom Button */}
-                            <a href="/bloom" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/bloom' ? 'sm:w-36' : ''}`}>
+                            <Link href="/bloom" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/bloom' ? 'sm:w-36' : ''}`}>
                                 <span className="flex justify-center items-center w-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0 text-red-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path
@@ -67,11 +68,11 @@ export function Taskbar() {
                                     </svg>
                                 </span>
                                 <span className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === '/bloom' ? 'sm:opacity-100' : ''}`}>Bloom</span>
-                            </a>
+                            </Link>
                         </div>
                         {/* Manifest Button */}
-                        <div className="relative group">
-                            <a href="/manifest" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/manifest' ? 'sm:w-36' : ''}`}>
+                        <div className="relative group"></div>
+                            <Link href="/manifest" className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === '/manifest' ? 'sm:w-36' : ''}`}>
                                 <span className="flex justify-center items-center w-full relative">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path
@@ -95,11 +96,9 @@ export function Taskbar() {
                                     </svg>
                                 </span>
                                 <span className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === '/manifest' ? 'sm:opacity-100' : ''}`}>Manifest</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
     );
 }
