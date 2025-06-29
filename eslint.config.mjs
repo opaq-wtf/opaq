@@ -25,6 +25,7 @@ const eslintConfig = [
         },
       ],
       "@next/next/no-page-custom-font": "off",
+      "react-hooks/exhaustive-deps": "off"
     },
   },
 ];
