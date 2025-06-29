@@ -49,7 +49,7 @@ export default function SignUp() {
       }
 
       try {
-        const res = await axios.post("http://localhost:3000/auth/check-user", {
+        const res = await axios.post("https://opaq.wtf/auth/check-user", {
           username,
         });
         setIsUsername(res.data.exists);
@@ -63,7 +63,7 @@ export default function SignUp() {
 
   const onSubmit: SubmitHandler<SignUpForm> = async (data: SignUpForm) => {
     try {
-      const res = await axios.post("http://localhost:3000/auth/sign-up", data);
+      const res = await axios.post("https://opaq.wtf/auth/sign-up", data);
       if (res.status === 201) {
         toast.success("Please verify your mail.", {
           description:

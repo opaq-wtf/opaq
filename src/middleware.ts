@@ -24,7 +24,7 @@ export async function middleware(req: NextRequest) {
 
   if (path !== "/api/log") {
     axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/log`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || "https://opaq.wtf"}/api/log`,
       { message: log },
       { headers: { "Content-Type": "application/json" } }
     ).catch((e) => console.error("Log send failed: ", e));
@@ -43,7 +43,7 @@ export async function middleware(req: NextRequest) {
     "/manifest"
   ];
 
-  const publicRoutes = ["/", "/about", "/guidelines", "/reach", ];
+  const publicRoutes = ["/", "/about", "/guidelines", "/reach",];
 
   const authRoutes = ["/sign-in", "sign-up", "/forgot-password"];
 
