@@ -38,6 +38,11 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [irysUrl, setIrysUrl] = useState<string | null>(null);
   const [walletConnected, setWalletConnected] = useState(false);
+  const [uploadCost, setUploadCost] = useState<string | null>(null);
+  const [costAccepted, setCostAccepted] = useState(false);
+  const [calculatingCost, setCalculatingCost] = useState(false);
+  const [ethToInrRate, setEthToInrRate] = useState<number | null>(null);
+  const [fetchingRate, setFetchingRate] = useState(false);
   const [suggestedTags] = useState([
     "Innovation",
     "Technology",
@@ -50,7 +55,22 @@ export default function UploadPage() {
   // Check wallet connection on component mount
   useEffect(() => {
     checkWalletConnection();
+    fetchEthToInrRate();
   }, []);
+
+  const fetchEthToInrRate = async () => {
+    setFetchingRate(true);
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=inr');
+      const data = await response.json();
+      setEthToInrRate(data.ethereum.inr);
+    } catch (error) {
+      console.error("Failed to fetch ETH to INR rate:", error);
+      setEthToInrRate(null);
+    } finally {
+      setFetchingRate(false);
+    }
+  };
 
   const checkWalletConnection = async () => {
     if (window.ethereum) {
@@ -72,6 +92,11 @@ export default function UploadPage() {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       setWalletConnected(true);
+
+      // Calculate cost if file is already selected
+      if (file) {
+        calculateUploadCost(file);
+      }
     } catch (error) {
       console.error("Failed to connect wallet:", error);
       alert("Failed to connect wallet. Please try again.");
@@ -89,15 +114,47 @@ export default function UploadPage() {
     return irysUploader;
   };
 
+  const calculateUploadCost = async (fileToUpload: File) => {
+    if (!walletConnected || !fileToUpload) return;
+
+    setCalculatingCost(true);
+    try {
+      const irysUploader = await getIrysUploader();
+      const fileSize = fileToUpload.size;
+
+      // Get the price for uploading this file size
+      const price = await irysUploader.getPrice(fileSize);
+
+      // Convert from atomic units to ETH
+      const priceInEth = ethers.utils.formatEther(price.toString());
+      setUploadCost(priceInEth);
+    } catch (error) {
+      console.error("Failed to calculate upload cost:", error);
+      setUploadCost("Error calculating cost");
+    } finally {
+      setCalculatingCost(false);
+    }
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
+      // Reset cost-related states when a new file is selected
+      setUploadCost(null);
+      setCostAccepted(false);
+      setIrysUrl(null);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
       };
       reader.readAsDataURL(selectedFile);
+
+      // Calculate cost for the new file
+      if (walletConnected) {
+        calculateUploadCost(selectedFile);
+      }
     }
   };
 
@@ -147,6 +204,11 @@ export default function UploadPage() {
 
     if (!file) {
       alert("Please select a file to upload.");
+      return;
+    }
+
+    if (!costAccepted) {
+      alert("Please review and accept the upload cost before submitting.");
       return;
     }
 
@@ -299,22 +361,33 @@ export default function UploadPage() {
                     />
                     {filePreview ? (
                       <div className="relative h-48 w-full">
-                      <Image
-                        src={filePreview}
-                        alt="File preview"
-                        fill
-                        className="mx-auto rounded-lg object-contain"
-                      />
+                        {file?.type.startsWith('video/') ? (
+                          <video
+                            src={filePreview}
+                            controls
+                            className="w-full h-full rounded-lg object-contain"
+                            style={{ maxHeight: '192px' }}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <Image
+                            src={filePreview}
+                            alt="File preview"
+                            fill
+                            className="mx-auto rounded-lg object-contain"
+                          />
+                        )}
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-gray-500">
-                      <Upload className="h-10 w-10" />
-                      <p className="font-semibold">
-                        Click to upload or drag and drop
-                      </p>
-                      <p className="text-xs">
-                        PNG, JPG, GIF, or MP4 (MAX. 800x400px)
-                      </p>
+                        <Upload className="h-10 w-10" />
+                        <p className="font-semibold">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs">
+                          PNG, JPG, GIF, or MP4 (MAX. 800x400px)
+                        </p>
                       </div>
                     )}
                   </div>
@@ -343,12 +416,77 @@ export default function UploadPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-center py-4">
-                      <div className="flex items-center justify-center text-green-400 mb-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                        Wallet Connected
+                    <div className="space-y-4">
+                      <div className="text-center py-2">
+                        <div className="flex items-center justify-center text-green-400 mb-2">
+                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                          Wallet Connected
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500">Ready for decentralized upload</p>
+
+                      {file && (
+                        <div className="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+                          <h4 className="text-white font-medium mb-3">Upload Cost</h4>
+                          {calculatingCost ? (
+                            <div className="flex items-center text-gray-400">
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Calculating cost...
+                            </div>
+                          ) : uploadCost && uploadCost !== "Error calculating cost" ? (
+                            <div className="space-y-3">
+                              <div className="space-y-2">
+                                <div className="text-lg font-mono text-blue-400">
+                                  {parseFloat(uploadCost).toFixed(6)} ETH
+                                </div>
+                                {ethToInrRate && (
+                                  <div className="text-md font-mono text-green-400">
+                                    ≈ ₹{(parseFloat(uploadCost) * ethToInrRate).toLocaleString('en-IN', {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2
+                                    })}
+                                  </div>
+                                )}
+                                {fetchingRate && (
+                                  <div className="text-xs text-gray-400">
+                                    Fetching INR rate...
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                File size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id="cost-acceptance"
+                                  checked={costAccepted}
+                                  onChange={(e) => setCostAccepted(e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                                />
+                                <label htmlFor="cost-acceptance" className="text-sm text-gray-300">
+                                  I accept the upload cost of {parseFloat(uploadCost).toFixed(6)} ETH
+                                  {ethToInrRate && (
+                                    <span className="text-green-400">
+                                      {" "}(₹{(parseFloat(uploadCost) * ethToInrRate).toLocaleString('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                      })})
+                                    </span>
+                                  )}
+                                </label>
+                              </div>
+                            </div>
+                          ) : uploadCost === "Error calculating cost" ? (
+                            <div className="text-red-400 text-sm">
+                              Unable to calculate cost. Please try again.
+                            </div>
+                          ) : (
+                            <div className="text-gray-400 text-sm">
+                              Select a file to see upload cost
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -442,10 +580,12 @@ export default function UploadPage() {
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                    disabled={isSubmitting || !walletConnected}
+                    disabled={isSubmitting || !walletConnected || !costAccepted}
                   >
                     {!walletConnected ? (
                       "Connect Wallet to Submit"
+                    ) : !costAccepted && file ? (
+                      "Accept Upload Cost to Submit"
                     ) : isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -464,9 +604,15 @@ export default function UploadPage() {
                     </div>
                   )}
                   {irysUrl && (
-                    <div className="mt-3 p-2 bg-green-900/20 border border-green-700 rounded text-green-300 text-sm">
-                      <p className="font-semibold">File uploaded to Arweave!</p>
-                      <p className="text-xs mt-1 break-all">ID: {irysUrl.split('/').pop()}</p>
+                    <div className="mt-4 bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-600/50 rounded-lg p-3 animate-fadeIn">
+                      <div className="flex items-center mb-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span className="text-green-300 font-medium">Successfully uploaded to Arweave</span>
+                      </div>
+                      <div className="flex items-center text-xs text-green-400/80 mt-1 overflow-hidden">
+                        <span className="mr-1 text-gray-400">ID:</span>
+                        <span className="truncate">{irysUrl.split('/').pop()}</span>
+                      </div>
                     </div>
                   )}
                 </CardFooter>
