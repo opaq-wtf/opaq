@@ -58,7 +58,7 @@ export async function middleware(req: NextRequest) {
   const session = await decrypt(cookie);
 
   if (isAuthRoute && session?.userId) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+    return NextResponse.redirect(new URL("/home", req.nextUrl));
   }
 
   if (isProtectedRoute) {
