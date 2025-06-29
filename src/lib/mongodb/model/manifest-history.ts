@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const manifestHistorySchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true },
+    id: { type: String, required: true },
     user_id: { type: String, required: true },
     prompt: { type: String, required: true },
     response: { type: String, required: true },
@@ -11,6 +11,7 @@ const manifestHistorySchema = new mongoose.Schema({
 });
 
 // Create indexes for efficient queries
+manifestHistorySchema.index({ id: 1 }, { unique: true }); // Unique constraint on id
 manifestHistorySchema.index({ user_id: 1, createdAt: -1 }); // Get user's history, sorted by newest
 
 const ManifestHistory = mongoose.models.ManifestHistory || mongoose.model('ManifestHistory', manifestHistorySchema);

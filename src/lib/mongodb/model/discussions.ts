@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const discussionSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true },
+    id: { type: String, required: true },
     post_id: { type: String, required: true },
     user_id: { type: String, required: true },
     content: { type: String, required: true },
@@ -16,6 +16,7 @@ const discussionSchema = new mongoose.Schema({
 });
 
 // Create indexes for efficient queries
+discussionSchema.index({ id: 1 }, { unique: true }); // Unique constraint on id
 discussionSchema.index({ post_id: 1, createdAt: -1 }); // Get discussions for a post, sorted by newest
 discussionSchema.index({ parent_id: 1, createdAt: 1 }); // Get replies for a discussion, sorted by oldest
 discussionSchema.index({ user_id: 1, createdAt: -1 }); // Get user's discussions
