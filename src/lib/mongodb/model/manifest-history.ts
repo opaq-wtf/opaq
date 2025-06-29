@@ -12,7 +12,6 @@ const manifestHistorySchema = new mongoose.Schema({
 
 // Create indexes for efficient queries
 manifestHistorySchema.index({ user_id: 1, createdAt: -1 }); // Get user's history, sorted by newest
-manifestHistorySchema.index({ id: 1 });
 
 const ManifestHistory = mongoose.models.ManifestHistory || mongoose.model('ManifestHistory', manifestHistorySchema);
 export default ManifestHistory;
