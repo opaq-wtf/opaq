@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
     const userOnly = searchParams.get("user_only") === "true";
+    const userId = searchParams.get("user_id"); // Add support for specific user ID
     const limit = parseInt(searchParams.get("limit") || "10");
     const page = parseInt(searchParams.get("page") || "1");
 
@@ -23,13 +24,21 @@ export async function GET(req: NextRequest) {
       filter.status = status;
     }
 
-    // Add user filter if user_only is true
+    // Add user filter if user_only is true (for current user's posts)
     if (userOnly) {
       const user = await getUserOptional();
       if (!user) {
         return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
       }
       filter.user_id = user.id;
+    } else if (userId) {
+      // Filter by specific user ID (for viewing other users' posts)
+      filter.user_id = userId;
+      // Only show published posts when viewing other users' profiles
+      const currentUser = await getUserOptional();
+      if (!currentUser || currentUser.id !== userId) {
+        filter.status = "Published";
+      }
     }
 
     const skip = (page - 1) * limit;

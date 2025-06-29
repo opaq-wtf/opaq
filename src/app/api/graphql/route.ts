@@ -14,6 +14,11 @@ const typeDefs = gql`
     full_name: String!
     email: String!
     username: String
+    bio: String
+    location: String
+    website: String
+    contact_visible: Boolean
+    createdAt: String
   }
 
   type Query {
@@ -51,6 +56,11 @@ const resolvers = {
         full_name: user.fullName,
         email: user.email,
         username: user.username,
+        bio: user.bio,
+        location: user.location,
+        website: user.website,
+        contact_visible: user.contactVisible,
+        createdAt: user.createdAt?.toISOString() || null,
       };
     },
   },

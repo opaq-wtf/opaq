@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uniqueIndex, boolean } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -8,6 +8,10 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     username: text("username").unique().notNull(),
     password: text("password").notNull(),
+    bio: text("bio"),
+    location: text("location"),
+    website: text("website"),
+    contactVisible: boolean("contact_visible").default(false),
     createdAt: timestamp("created_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true }),
     emailVerified: timestamp("email_verified", { withTimezone: true }),

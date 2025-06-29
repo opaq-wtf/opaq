@@ -87,6 +87,7 @@ export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const userOnly = searchParams.get("user_only") === "true";
+        const userId = searchParams.get("user_id"); // Add support for specific user ID
         const limit = parseInt(searchParams.get("limit") || "10");
         const page = parseInt(searchParams.get("page") || "1");
 
@@ -112,6 +113,13 @@ export async function GET(req: NextRequest) {
         if (userOnly && currentUserId) {
             // For user's own pitches, show both public and private
             whereConditions.push(eq(pitches.userId, currentUserId));
+        } else if (userId) {
+            // For specific user's pitches
+            whereConditions.push(eq(pitches.userId, userId));
+            // Only show public pitches when viewing other users' profiles
+            if (!currentUserId || currentUserId !== userId) {
+                whereConditions.push(eq(pitches.visibility, "public"));
+            }
         } else {
             // For public pitches, only show public ones
             whereConditions.push(eq(pitches.visibility, "public"));
