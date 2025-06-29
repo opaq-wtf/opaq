@@ -397,7 +397,7 @@ export default function PostDetailPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.back()}
+            onClick={() => router.push("/artwall")}
             className="text-gray-400 hover:text-white"
           >
             <ArrowLeft className="w-4 h-4" />

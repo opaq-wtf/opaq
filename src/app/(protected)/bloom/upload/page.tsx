@@ -229,7 +229,7 @@ export default function UploadPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.back()}
+            onClick={() => router.push("/bloom")}
             className="mr-4 text-gray-400 hover:text-white hover:bg-gray-800"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

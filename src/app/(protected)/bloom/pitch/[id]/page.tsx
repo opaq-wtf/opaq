@@ -162,8 +162,8 @@ export default function PitchDetailPage() {
     // Create the pitch link
     const pitchLink = `${window.location.origin}/bloom/pitch/${pitch.id}`;
 
-    // Add the pitch link to the content
-    const contentWithLink = `${pitch.description}\n\n---\n🚀 **Original Pitch:** [View on Bloom](${pitchLink})`;
+    // Add the pitch link to the content (embedded link for WYSIWYG)
+    const contentWithLink = `${pitch.description} \n\n---\n🚀 Original Pitch: <a href="${pitchLink}" target="_blank" rel="noopener noreferrer">View on Bloom</a>`;
 
     // Navigate to artwall upload page with pre-filled data
     const params = new URLSearchParams({
@@ -195,7 +195,7 @@ export default function PitchDetailPage() {
         <div className="text-center">
           <p className="text-red-400 mb-4">{error || 'Pitch not found'}</p>
           <Button
-            onClick={() => router.back()}
+            onClick={() => router.push("/bloom")}
             variant="outline"
             className="border-gray-600 text-gray-300 hover:bg-gray-700"
           >
@@ -216,7 +216,7 @@ export default function PitchDetailPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.back()}
+            onClick={() => router.push("/bloom")}
             className="text-gray-400 hover:text-white hover:bg-gray-800"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
