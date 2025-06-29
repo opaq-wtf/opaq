@@ -9,7 +9,7 @@ export async function tokenGen(id: string, email: string, full_name: string) {
   const hashedToken = createHash("sha256").update(rawToken).digest("hex");
   const expiresAt = addMinutes(new Date(), 15);
 
-  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/auth/verify-email?token=${rawToken}&id=${id}`;
+  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email?token=${rawToken}&id=${id}`;
 
   await db
     .insert(emailVerification)

@@ -18,6 +18,7 @@ export async function sendVerificationEmail(
   html = html.replace("{{link}}", link);
   html = html.replace("{{user}}", full_name);
 
+  console.log("Sending email to:", email);
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
