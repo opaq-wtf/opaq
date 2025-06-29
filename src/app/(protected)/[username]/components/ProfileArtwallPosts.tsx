@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Eye, Heart, MessageCircle, Calendar, Edit, Tag, Share, Filter, List, Grid3X3 } from "lucide-react";
+import { BookOpen, Eye, Heart, MessageCircle, Calendar, Edit, Filter, List, Grid3X3 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 interface Post {
     _id: string;
@@ -108,6 +107,8 @@ export default function ProfileArtwallPosts({ userId, isOwnProfile }: ProfileArt
                                 stats: statsResponse.data.stats || { likes: 0, saves: 0, views: 0, comments: 0 }
                             };
                         } catch (error) {
+                            console.error(`Failed to fetch stats for post ${post.id}`, error);
+
                             return {
                                 ...post,
                                 stats: { likes: 0, saves: 0, views: 0, comments: 0 }

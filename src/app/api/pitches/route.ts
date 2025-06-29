@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
         const skip = (page - 1) * limit;
 
         // Build query conditions
-        let whereConditions = [];
+        const whereConditions = [];
 
         if (userOnly && currentUserId) {
             // For user's own pitches, show both public and private

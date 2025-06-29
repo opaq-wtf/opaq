@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { pitches } from "@/lib/db/schema/pitches";
 import { users } from "@/lib/db/schema/user";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getUser } from "@/app/data/user";
 import { generatePitchOtp, verifyPitchOtp } from "@/actions/pitch-otp";
 

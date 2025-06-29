@@ -130,14 +130,14 @@ export default function ManifestPage() {
                 onClick={() => handleSuggestionClick("Does an idea like this exist?")}
                 className="rounded-full border border-gray-700 bg-gray-900 px-5 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
               >
-                "Does an idea like this exist?"
+                &ldquo;Does an idea like this exist?&rdquo;
               </button>
               <button
                 type="button"
                 onClick={() => handleSuggestionClick("I am working on an idea...")}
                 className="rounded-full border border-gray-700 bg-gray-900 px-5 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
               >
-                "I am working on an idea..."
+                &ldquo;I am working on an idea...&rdquo;
               </button>
             </div>
           </div>

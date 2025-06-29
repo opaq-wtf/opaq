@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, Mail, Lock, Globe, Loader2, X } from "lucide-react";
+import { EyeOff, Mail, Lock, Globe, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface PitchVisibilityModalProps {
@@ -153,7 +153,7 @@ export default function PitchVisibilityModal({
             </Button>
           </div>
           <CardDescription className="text-gray-400">
-            Manage who can see "{pitch.title}"
+            Manage who can see &ldquo;{pitch.title}&rdquo;
           </CardDescription>
         </CardHeader>
 
@@ -214,7 +214,7 @@ export default function PitchVisibilityModal({
                     Enter Verification Code
                   </h3>
                   <p className="text-sm text-gray-400">
-                    We've sent a 6-character OTP to your email. Enter it below to make your pitch public.
+                    We&apos;ve sent a 6-character OTP to your email. Enter it below to make your pitch public.
                   </p>
 
                   <div className="space-y-3">
@@ -254,7 +254,7 @@ export default function PitchVisibilityModal({
                   </div>
 
                   <p className="text-xs text-gray-500 text-center">
-                    OTP expires in 10 minutes. Check your spam folder if you don't see the email.
+                    OTP expires in 10 minutes. Check your spam folder if you don&apos;t see the email.
                   </p>
                 </div>
               )}

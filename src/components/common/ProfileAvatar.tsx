@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User, Camera } from "lucide-react";
+import { Camera } from "lucide-react";
+import Image from "next/image";
 
 interface ProfileAvatarProps {
   fullName: string;
@@ -92,10 +93,11 @@ export default function ProfileAvatar({
         className={`${sizeClasses} bg-gradient-to-br ${colorClasses} rounded-full flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden`}
       >
         {shouldShowImage ? (
-          <img
+          <Image
             src={imageSource!}
             alt={`${fullName}'s profile picture`}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             onError={() => setImageError(true)}
           />
         ) : (

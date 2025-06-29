@@ -66,6 +66,14 @@ export async function PUT(req: NextRequest) {
                 const imageType = base64Match[1];
                 const imageData = base64Match[2];
 
+                // Validate image type
+                const validImageTypes = ["jpeg", "jpg", "png", "gif", "webp"];
+                if (!validImageTypes.includes(imageType)) {
+                    return NextResponse.json(
+                        { message: "Invalid image format. Supported formats are JPEG, PNG, GIF, WebP" },
+                        { status: 400 }
+                    );
+                }
                 // Calculate file size (base64 is roughly 4/3 the size of the original)
                 const sizeInBytes = (imageData.length * 3) / 4;
                 const sizeInMB = sizeInBytes / (1024 * 1024);
@@ -225,7 +233,7 @@ export async function PUT(req: NextRequest) {
     }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
     try {
         const user = await getUser();
         if (!user || !user.id) {

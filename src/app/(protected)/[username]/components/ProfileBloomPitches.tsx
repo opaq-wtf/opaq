@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-    MessageCircle,
     Eye,
     Heart,
     Calendar,
@@ -12,7 +11,7 @@ import {
     Lock,
     Globe,
     FileText,
-    Image,
+    Image as ImageIcon,
     Video,
     File,
     Filter,
@@ -23,6 +22,7 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Pitch {
     id: string;
@@ -98,7 +98,7 @@ export default function ProfileBloomPitches({ userId, isOwnProfile }: ProfileBlo
 
     const getFileIcon = (fileType: string) => {
         switch (fileType) {
-            case 'image': return <Image className="w-6 h-6" />;
+            case 'image': return <ImageIcon className="w-6 h-6" />;
             case 'video': return <Video className="w-6 h-6" />;
             case 'pdf': return <FileText className="w-6 h-6" />;
             default: return <File className="w-6 h-6" />;
@@ -137,7 +137,7 @@ export default function ProfileBloomPitches({ userId, isOwnProfile }: ProfileBlo
             const response = await axios.get("/api/pitches", { params });
 
             if (response.data.pitches) {
-                let allUserPitches = response.data.pitches;
+                const allUserPitches = response.data.pitches;
 
                 console.log(`[ProfileBloomPitches] Fetched ${allUserPitches.length} pitches for ${isOwnProfile ? 'own' : 'other'} profile`);
                 console.log(`[ProfileBloomPitches] Current filter: ${filter}`);
@@ -374,7 +374,7 @@ export default function ProfileBloomPitches({ userId, isOwnProfile }: ProfileBlo
                                 {/* File Preview */}
                                 <div className="w-16 h-16 bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                     {getFileType(pitch.fileUrl) === 'image' ? (
-                                        <img
+                                        <Image
                                             src={pitch.fileUrl}
                                             alt={pitch.title}
                                             className="w-full h-full object-cover"

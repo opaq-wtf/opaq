@@ -11,8 +11,6 @@ import {
   Bookmark,
   Calendar,
   Tag,
-  HeartOff,
-  BookmarkX,
   Share2,
   MessageCircle
 } from "lucide-react";
@@ -389,11 +387,10 @@ export function LikedPostsList({ currentUserId }: LikedPostsListProps) {
                       >
                         {post.title}
                       </Link>
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        post.status === "Published"
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${post.status === "Published"
                           ? "bg-green-900/50 text-green-400 border border-green-500/30"
                           : "bg-yellow-900/50 text-yellow-400 border border-yellow-500/30"
-                      }`}>
+                        }`}>
                         {post.status}
                       </span>
                     </div>
@@ -471,11 +468,10 @@ export function LikedPostsList({ currentUserId }: LikedPostsListProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleLike(post.id)}
-                      className={`${
-                        post.interaction?.liked
+                      className={`${post.interaction?.liked
                           ? "text-red-400 hover:text-red-300"
                           : "text-gray-400 hover:text-red-400"
-                      }`}
+                        }`}
                     >
                       {post.interaction?.liked ? <Heart className="w-4 h-4 fill-current" /> : <Heart className="w-4 h-4" />}
                     </Button>
@@ -484,11 +480,10 @@ export function LikedPostsList({ currentUserId }: LikedPostsListProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleSave(post.id)}
-                      className={`${
-                        post.interaction?.saved
+                      className={`${post.interaction?.saved
                           ? "text-blue-400 hover:text-blue-300"
                           : "text-gray-400 hover:text-blue-400"
-                      }`}
+                        }`}
                     >
                       {post.interaction?.saved ? <Bookmark className="w-4 h-4 fill-current" /> : <Bookmark className="w-4 h-4" />}
                     </Button>

@@ -22,9 +22,6 @@ import {
   Settings,
   Eye,
   EyeOff,
-  Heart,
-  Bookmark,
-  Users
 } from "lucide-react";
 import ProfileEdit from "./components/ProfileEdit";
 import ProfileArtwallPosts from "./components/ProfileArtwallPosts";
@@ -84,6 +81,7 @@ export default function ProfilePage() {
           const currentUserRes = await axios.get("/api/auth/me");
           setCurrentUser(currentUserRes.data);
         } catch (error) {
+          console.log(error);
           // User might not be logged in - that's okay
           setCurrentUser(null);
         }
@@ -182,13 +180,14 @@ export default function ProfilePage() {
     toast.success("Profile updated successfully");
   };
 
-  const formatDate = (dateString?: string) => {
+  const _formatDate = (dateString?: string) => {
     if (!dateString) return "Unknown";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
     });
   };
+
 
   const formatJoinDate = (dateString?: string) => {
     if (!dateString) return "Unknown";

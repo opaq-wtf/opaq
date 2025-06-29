@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Upload, X, Check } from "lucide-react";
+import { Upload, X, Check } from "lucide-react";
 import ProfileAvatar from "./ProfileAvatar";
 
 interface ProfilePictureUploadProps {

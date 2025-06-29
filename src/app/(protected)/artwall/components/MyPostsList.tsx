@@ -49,11 +49,13 @@ interface MyPostsListProps {
 }
 
 export function MyPostsList({ currentUserId }: MyPostsListProps) {
+
   const [posts, setPosts] = useState<PostWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
 
+  console.log("Rendering MyPostsList with currentUserId:", currentUserId);
   // Fetch user's posts
   const fetchUserPosts = async () => {
     try {
@@ -76,6 +78,7 @@ export function MyPostsList({ currentUserId }: MyPostsListProps) {
                 stats: statsResponse.data.stats || { likes: 0, saves: 0, views: 0 }
               };
             } catch (error) {
+              console.error(`Error fetching stats for post ${post.id}:`, error);
               return {
                 ...post,
                 stats: { likes: 0, saves: 0, views: 0 }
@@ -253,11 +256,10 @@ export function MyPostsList({ currentUserId }: MyPostsListProps) {
                       >
                         {post.title}
                       </Link>
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        post.status === "Published"
-                          ? "bg-green-900/50 text-green-400 border border-green-500/30"
-                          : "bg-yellow-900/50 text-yellow-400 border border-yellow-500/30"
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${post.status === "Published"
+                        ? "bg-green-900/50 text-green-400 border border-green-500/30"
+                        : "bg-yellow-900/50 text-yellow-400 border border-yellow-500/30"
+                        }`}>
                         {post.status}
                       </span>
                     </div>
@@ -326,9 +328,8 @@ export function MyPostsList({ currentUserId }: MyPostsListProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => togglePostStatus(post)}
-                      className={`text-gray-400 hover:text-white ${
-                        post.status === "Published" ? "hover:text-yellow-400" : "hover:text-green-400"
-                      }`}
+                      className={`text-gray-400 hover:text-white ${post.status === "Published" ? "hover:text-yellow-400" : "hover:text-green-400"
+                        }`}
                       title={post.status === "Published" ? "Unpublish" : "Publish"}
                     >
                       {post.status === "Published" ? "📤" : "📝"}
