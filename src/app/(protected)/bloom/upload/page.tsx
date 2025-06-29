@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Upload, ArrowLeft, Loader2, X } from "lucide-react";
+import { Upload, ArrowLeft, Loader2, X, Lock } from "lucide-react";
 import Image from "next/image";
 
 export default function UploadPage() {
@@ -426,6 +426,18 @@ export default function UploadPage() {
                     Ready to share your pitch with the world?
                   </CardDescription>
                 </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-3 bg-blue-900/20 border border-blue-700 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm font-medium text-orange-400">Privacy Setting</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Your pitch will be created as <strong>private</strong> by default.
+                      You can make it public later from your My Pitches page after email verification.
+                    </p>
+                  </div>
+                </CardContent>
                 <CardFooter>
                   <Button
                     type="submit"

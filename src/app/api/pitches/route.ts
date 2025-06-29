@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { pitches } from "@/lib/db/schema/pitches";
 import { getUser } from "@/app/data/user";
 import { v4 as uuid } from "uuid";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 
 interface PitchData {
     title: string;
@@ -91,26 +91,37 @@ export async function GET(req: NextRequest) {
         const page = parseInt(searchParams.get("page") || "1");
 
         let currentUserId: string | null = null;
-
-        // If user_only is true, get current user
-        if (userOnly) {
-            const user = await getUser();
-            if (!user || !user.id) {
-                return NextResponse.json(
-                    { message: "Authentication required" },
-                    { status: 401 }
-                );
-            }
+        const user = await getUser();
+        if (user?.id) {
             currentUserId = user.id;
+        }
+
+        // If user_only is true, require authentication
+        if (userOnly && !currentUserId) {
+            return NextResponse.json(
+                { message: "Authentication required" },
+                { status: 401 }
+            );
         }
 
         const skip = (page - 1) * limit;
 
+        // Build query conditions
+        let whereConditions = [];
+
+        if (userOnly && currentUserId) {
+            // For user's own pitches, show both public and private
+            whereConditions.push(eq(pitches.userId, currentUserId));
+        } else {
+            // For public pitches, only show public ones
+            whereConditions.push(eq(pitches.visibility, "public"));
+        }
+
         // Get pitches
         const query = db.select().from(pitches);
 
-        if (userOnly && currentUserId) {
-            query.where(eq(pitches.userId, currentUserId));
+        if (whereConditions.length > 0) {
+            query.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));
         }
 
         const allPitches = await query
@@ -121,8 +132,8 @@ export async function GET(req: NextRequest) {
         // Get total count for pagination
         const totalQuery = db.select({ count: sql<number>`count(*)` }).from(pitches);
 
-        if (userOnly && currentUserId) {
-            totalQuery.where(eq(pitches.userId, currentUserId));
+        if (whereConditions.length > 0) {
+            totalQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));
         }
 
         const totalResult = await totalQuery;

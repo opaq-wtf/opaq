@@ -10,11 +10,15 @@ import {
   Clock,
   ArrowLeft,
   Loader2,
+  Settings,
+  Globe,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import PitchVisibilityModal from "./components/PitchVisibilityModal";
 
 interface Pitch {
   id: string;
@@ -23,6 +27,7 @@ interface Pitch {
   fileUrl: string;
   irysId: string;
   tags: string[];
+  visibility: "public" | "private";
   viewsCount: number;
   likesCount: number;
   createdAt: string;
@@ -60,6 +65,10 @@ export default function MyPitchesPage() {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibilityModal, setVisibilityModal] = useState<{
+    isOpen: boolean;
+    pitch: Pitch | null;
+  }>({ isOpen: false, pitch: null });
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -90,6 +99,22 @@ export default function MyPitchesPage() {
 
     fetchPitches();
   }, []);
+
+  const handleVisibilityChange = (pitchId: string, newVisibility: "public" | "private") => {
+    setPitches(prevPitches =>
+      prevPitches.map(pitch =>
+        pitch.id === pitchId ? { ...pitch, visibility: newVisibility } : pitch
+      )
+    );
+  };
+
+  const openVisibilityModal = (pitch: Pitch) => {
+    setVisibilityModal({ isOpen: true, pitch });
+  };
+
+  const closeVisibilityModal = () => {
+    setVisibilityModal({ isOpen: false, pitch: null });
+  };
 
   return (
     <div className="bg-black text-white min-h-screen p-4 sm:p-6 lg:p-8">
@@ -177,16 +202,54 @@ export default function MyPitchesPage() {
               return (
                 <Card
                   key={pitch.id}
-                  className="bg-gray-900 border-gray-800 overflow-hidden transition-all hover:shadow-lg hover:border-blue-500/50 cursor-pointer"
-                  onClick={() => router.push(`/bloom/pitch/${pitch.id}`)}
+                  className="bg-gray-900 border-gray-800 overflow-hidden transition-all hover:shadow-lg hover:border-blue-500/50"
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-1 flex-col justify-between">
                       <div>
-                        <h2 className="text-2xl font-bold mb-2 text-gray-100">
-                          {pitch.title}
-                        </h2>
-                        <p className="text-gray-400 mb-4 text-sm leading-relaxed">
+                        {/* Title and Visibility Status */}
+                        <div className="flex items-start justify-between mb-2">
+                          <h2
+                            className="text-2xl font-bold text-gray-100 cursor-pointer hover:text-blue-400 transition-colors flex-1"
+                            onClick={() => router.push(`/bloom/pitch/${pitch.id}`)}
+                          >
+                            {pitch.title}
+                          </h2>
+                          <div className="flex items-center gap-2 ml-4">
+                            {/* Visibility Indicator */}
+                            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              pitch.visibility === "public"
+                                ? "bg-green-900/30 text-green-400 border border-green-700"
+                                : "bg-orange-900/30 text-orange-400 border border-orange-700"
+                            }`}>
+                              {pitch.visibility === "public" ? (
+                                <Globe className="w-3 h-3" />
+                              ) : (
+                                <Lock className="w-3 h-3" />
+                              )}
+                              {pitch.visibility === "public" ? "Public" : "Private"}
+                            </div>
+
+                            {/* Visibility Settings Button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openVisibilityModal(pitch);
+                              }}
+                              className="text-gray-400 hover:text-white hover:bg-gray-800 p-2"
+                              title="Manage visibility"
+                            >
+                              <Settings className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <p
+                          className="text-gray-400 mb-4 text-sm leading-relaxed cursor-pointer hover:text-gray-300 transition-colors"
+                          onClick={() => router.push(`/bloom/pitch/${pitch.id}`)}
+                        >
                           {pitch.description}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-500 mb-4">
@@ -235,6 +298,16 @@ export default function MyPitchesPage() {
           </div>
         )}
       </div>
+
+      {/* Visibility Modal */}
+      {visibilityModal.isOpen && visibilityModal.pitch && (
+        <PitchVisibilityModal
+          isOpen={visibilityModal.isOpen}
+          onClose={closeVisibilityModal}
+          pitch={visibilityModal.pitch}
+          onVisibilityChange={handleVisibilityChange}
+        />
+      )}
     </div>
   );
 }

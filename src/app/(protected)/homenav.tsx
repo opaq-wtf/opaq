@@ -1,4 +1,5 @@
 "use client";
+import { logout } from "@/actions/logout";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -31,11 +32,11 @@ export default function HomeNav() {
             <Link href="/home" className="text-teal-600 dark:text-teal-300 flex flex-col items-start">
               <span className="sr-only">Home</span>
               <Image
-              src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
-              alt="Home Logo"
-              width={32}
-              height={32}
-              className="h-8 w-auto object-cover rounded"
+                src="https://forcdn.pages.dev/assets/outerAsset%2014opaq-ful.svg"
+                alt="Home Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-cover rounded"
               />
             </Link>
             <link
@@ -88,7 +89,7 @@ export default function HomeNav() {
                     >
                       settings
                     </a>
-                    <form method="POST" action="#">
+                    <form action={logout}>
                       <button
                         type="submit"
                         className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-600/10"

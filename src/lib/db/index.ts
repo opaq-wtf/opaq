@@ -2,7 +2,14 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { users } from "./schema/user";
 import { emailVerification } from "./schema/email-verification";
-import { pitches, pitchesRelations } from "./schema/pitches";
+import {
+  pitches,
+  pitchesRelations,
+  pitchInteractions,
+  pitchInteractionsRelations,
+  pitchOtpVerification,
+  pitchOtpVerificationRelations
+} from "./schema/pitches";
 
 import dotenv from "dotenv";
 
@@ -21,6 +28,10 @@ export const db = drizzle(client, {
     emailVerification,
     pitches,
     pitchesRelations,
+    pitchInteractions,
+    pitchInteractionsRelations,
+    pitchOtpVerification,
+    pitchOtpVerificationRelations,
   },
   logger: false,
 });

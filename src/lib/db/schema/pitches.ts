@@ -12,10 +12,25 @@ export const pitches = pgTable("pitches", {
     fileUrl: text("file_url").notNull(),
     irysId: text("irys_id").notNull(),
     tags: jsonb("tags").$type<string[]>().notNull(),
+    visibility: text("visibility").notNull().default("private"), // "private" | "public"
     viewsCount: integer("views_count").notNull().default(0),
     likesCount: integer("likes_count").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Table to store OTP for pitch visibility change
+export const pitchOtpVerification = pgTable("pitch_otp_verification", {
+    id: text("id").primaryKey(),
+    pitchId: text("pitch_id")
+        .notNull()
+        .references(() => pitches.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    otpHash: text("otp_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Table to track individual user interactions with pitches
@@ -42,6 +57,10 @@ export const pitchesRelations = relations(pitches, ({ one, many }) => ({
         references: [users.id],
     }),
     interactions: many(pitchInteractions),
+    otpVerification: one(pitchOtpVerification, {
+        fields: [pitches.id],
+        references: [pitchOtpVerification.pitchId],
+    }),
 }));
 
 export const pitchInteractionsRelations = relations(pitchInteractions, ({ one }) => ({
@@ -51,6 +70,17 @@ export const pitchInteractionsRelations = relations(pitchInteractions, ({ one })
     }),
     pitch: one(pitches, {
         fields: [pitchInteractions.pitchId],
+        references: [pitches.id],
+    }),
+}));
+
+export const pitchOtpVerificationRelations = relations(pitchOtpVerification, ({ one }) => ({
+    user: one(users, {
+        fields: [pitchOtpVerification.userId],
+        references: [users.id],
+    }),
+    pitch: one(pitches, {
+        fields: [pitchOtpVerification.pitchId],
         references: [pitches.id],
     }),
 }));

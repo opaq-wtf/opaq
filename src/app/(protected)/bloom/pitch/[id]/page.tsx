@@ -14,6 +14,7 @@ interface Pitch {
   fileUrl: string;
   irysId: string;
   tags: string[];
+  visibility: "public" | "private";
   viewsCount: number;
   likesCount: number;
   createdAt: string;
