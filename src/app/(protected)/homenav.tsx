@@ -3,6 +3,8 @@ import { logout } from "@/actions/logout";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import ProfileAvatar from "@/components/common/ProfileAvatar";
+import axios from "axios";
 
 // Custom hook to handle clicks outside a referenced element
 function useClickOutside(
@@ -20,10 +22,36 @@ function useClickOutside(
   }, [ref, handler]);
 }
 
+interface CurrentUser {
+  id: string;
+  username: string;
+  fullName: string;
+  full_name?: string;
+  profile_picture_data?: string;
+}
+
 export default function HomeNav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
   useClickOutside(menuRef, () => setMenuOpen(false));
+
+  // Fetch current user data
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await axios.get("/api/auth/me");
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+        // User might not be logged in
+        setCurrentUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
   return (
     <header className="bg-black ">
       <div className="mx-auto max-w-screen-xl px-2 sm:px-6 lg:px-8">
@@ -49,17 +77,22 @@ export default function HomeNav() {
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
-                className="overflow-hidden rounded-full border border-gray-300 shadow-inner dark:border-gray-600"
+                className="overflow-hidden rounded-full border border-gray-300 shadow-inner dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 onClick={() => setMenuOpen((open) => !open)}
               >
                 <span className="sr-only">Toggle dashboard menu</span>
-                <Image
-                  alt=""
-                  className="size-10 object-cover"
-                  width={40}
-                  height={40}
-                  src={"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
-                />
+                {currentUser ? (
+                  <ProfileAvatar
+                    fullName={currentUser.fullName || currentUser.full_name || "User"}
+                    profilePictureData={currentUser.profile_picture_data}
+                    size="md"
+                    className="border-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">?</span>
+                  </div>
+                )}
               </button>
 
               {menuOpen && (
@@ -68,27 +101,15 @@ export default function HomeNav() {
                   role="menu"
                 >
                   <div className="p-2">
-                    <a
-                      href="#"
+                    <Link
+                      href={currentUser ? `/${currentUser.username}` : "#"}
                       className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                       role="menuitem"
+                      onClick={() => setMenuOpen(false)}
                     >
                       My profile
-                    </a>
-                    <a
-                      href="#"
-                      className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                      role="menuitem"
-                    >
-                      My data
-                    </a>
-                    <a
-                      href="#"
-                      className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                      role="menuitem"
-                    >
-                      settings
-                    </a>
+                    </Link>
+
                     <form action={logout}>
                       <button
                         type="submit"

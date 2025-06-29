@@ -52,7 +52,17 @@ export const getUserOptional = cache(async () => {
 function userDTO(user: any) {
   return {
     id: user.id,
-    full_name: user.full_name,
+    full_name: user.fullName || user.full_name,
     username: user.username,
+    email: user.email,
+    bio: user.bio,
+    location: user.location,
+    website: user.website,
+    contact_visible: user.contactVisible || user.contact_visible,
+    profile_picture: user.profilePicture || user.profile_picture,
+    profile_picture_data: user.profilePictureData || user.profile_picture_data,
+    profile_picture_irys_id: user.profilePictureIrysId || user.profile_picture_irys_id,
+    date_of_birth: user.dateOfBirth || user.date_of_birth,
+    createdAt: user.createdAt,
   };
 }

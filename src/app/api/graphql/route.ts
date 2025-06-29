@@ -18,6 +18,9 @@ const typeDefs = gql`
     location: String
     website: String
     contact_visible: Boolean
+    profile_picture: String
+    profile_picture_data: String
+    date_of_birth: String
     createdAt: String
   }
 
@@ -60,6 +63,9 @@ const resolvers = {
         location: user.location,
         website: user.website,
         contact_visible: user.contactVisible,
+        profile_picture: user.profilePicture,
+        profile_picture_data: user.profilePictureData,
+        date_of_birth: user.dateOfBirth?.toISOString() || null,
         createdAt: user.createdAt?.toISOString() || null,
       };
     },

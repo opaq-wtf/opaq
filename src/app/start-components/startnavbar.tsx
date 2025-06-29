@@ -20,9 +20,8 @@ export default function StartNavbar() {
       )}
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-[100] h-full w-full bg-white dark:bg-gray-900 transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 z-[100] h-full w-full bg-white dark:bg-gray-900 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         style={{ willChange: "transform" }}
       >
         <div className="flex flex-col h-full p-8">
@@ -81,9 +80,9 @@ export default function StartNavbar() {
                 </Link>
               </li>
               <li>
-                <a
+                <Link
                   className="rounded-full bg-black px-6 py-3 text-lg font-medium text-white shadow-sm hover:bg-gray-800 transition flex items-center gap-2 justify-center mt-2"
-                  href="#"
+                  href="/sign-in"
                   onClick={() => setSidebarOpen(false)}
                 >
                   Start Pitching
@@ -101,7 +100,7 @@ export default function StartNavbar() {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                </a>
+                </Link>
               </li>
             </ul>
           </nav>

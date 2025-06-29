@@ -12,7 +12,8 @@ export async function GET(_req: NextRequest) {
         return NextResponse.json({
             id: user.id,
             username: user.username,
-            fullName: user.full_name
+            fullName: user.full_name,
+            profile_picture_data: user.profile_picture_data
         }, { status: 200 });
 
     } catch (error: any) {

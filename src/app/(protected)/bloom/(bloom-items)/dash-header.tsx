@@ -83,20 +83,7 @@ export default function DashHeader() {
                     >
                       My profile
                     </a>
-                    <a
-                      href="#"
-                      className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                      role="menuitem"
-                    >
-                      My data
-                    </a>
-                    <a
-                      href="#"
-                      className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                      role="menuitem"
-                    >
-                      settings
-                    </a>
+
                     <form action={logout}>
                       <button
                         type="submit"

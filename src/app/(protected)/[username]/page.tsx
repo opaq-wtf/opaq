@@ -29,6 +29,7 @@ import {
 import ProfileEdit from "./components/ProfileEdit";
 import ProfileArtwallPosts from "./components/ProfileArtwallPosts";
 import ProfileBloomPitches from "./components/ProfileBloomPitches";
+import ProfileAvatar from "@/components/common/ProfileAvatar";
 
 interface User {
   id: string;
@@ -39,6 +40,9 @@ interface User {
   location?: string;
   website?: string;
   contact_visible?: boolean;
+  profile_picture?: string;
+  profile_picture_data?: string;
+  date_of_birth?: string;
   createdAt?: string;
 }
 
@@ -97,6 +101,9 @@ export default function ProfilePage() {
                 location
                 website
                 contact_visible
+                profile_picture
+                profile_picture_data
+                date_of_birth
                 createdAt
               }
             }
@@ -237,9 +244,15 @@ export default function ProfilePage() {
             <div className="flex flex-col lg:flex-row items-start gap-8">
               {/* Avatar and Basic Info */}
               <div className="flex flex-col items-center lg:items-start gap-4">
-                <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-4xl font-bold text-black shadow-lg">
-                  {user.full_name.charAt(0).toUpperCase()}
-                </div>
+                <ProfileAvatar
+                  fullName={user.full_name}
+                  profilePictureData={user.profile_picture_data}
+                  profilePicture={user.profile_picture}
+                  size="xl"
+                  showEditButton={!!isOwnProfile}
+                  onEdit={() => setIsEditing(true)}
+                  className="shadow-lg"
+                />
 
                 {/* Quick Stats */}
                 {profileStats && (
@@ -294,6 +307,18 @@ export default function ProfilePage() {
                     <Calendar className="w-4 h-4" />
                     <span>{formatJoinDate(user.createdAt)}</span>
                   </div>
+
+                  {/* Date of Birth - Only visible to profile owner */}
+                  {isOwnProfile && user.date_of_birth && (
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Calendar className="w-4 h-4" />
+                      <span>Born {new Date(user.date_of_birth).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</span>
+                    </div>
+                  )}
 
                   {user.location && (
                     <div className="flex items-center gap-2 text-gray-400">
