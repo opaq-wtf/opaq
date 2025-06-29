@@ -127,7 +127,7 @@ export function Taskbar() {
             {/* Manifest Button */}
             <div className="relative group">
               <Link
-                href="#"
+                href="/manifest"
                 className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === "/manifest" ? "sm:w-36" : ""}`}
               >
                 <span className="flex justify-center items-center w-full relative">
