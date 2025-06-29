@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useState, useCallback, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { useEditor } from "./hooks/useEditor";
 import "./editor-styles.css";
 import axios from 'axios';
 
-export default function ArtWallPostEdit() {
+function ArtWallPostEditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editPostId = searchParams.get('edit');
@@ -786,11 +786,10 @@ export default function ArtWallPostEdit() {
         <section className="flex-1 bg-gray-900 rounded-lg shadow-xl p-8 flex flex-col border border-gray-700">
           <div className="mb-4">
             <input
-              className={`text-3xl font-bold w-full outline-none border-b-2 py-3 transition bg-transparent text-white placeholder-gray-400 ${
-                errors.title
+              className={`text-3xl font-bold w-full outline-none border-b-2 py-3 transition bg-transparent text-white placeholder-gray-400 ${errors.title
                   ? "border-red-500"
                   : "border-gray-700 focus:border-blue-500"
-              }`}
+                }`}
               placeholder="Enter your post title..."
               value={title}
               onChange={(e) => {
@@ -834,11 +833,10 @@ export default function ArtWallPostEdit() {
               <>
                 <div
                   ref={editorRef}
-                  className={`editor-content min-h-[400px] outline-none p-4 border-2 rounded-lg bg-gray-800 text-white transition resize-none ${
-                    errors.content
+                  className={`editor-content min-h-[400px] outline-none p-4 border-2 rounded-lg bg-gray-800 text-white transition resize-none ${errors.content
                       ? "border-red-500"
                       : "border-gray-600 focus:border-blue-400"
-                  }`}
+                    }`}
                   contentEditable
                   suppressContentEditableWarning
                   spellCheck={true}
@@ -983,5 +981,24 @@ export default function ArtWallPostEdit() {
         </aside>
       </main>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex items-center gap-2 text-white">
+        <Loader2 className="w-6 h-6 animate-spin" />
+        <span>Loading editor...</span>
+      </div>
+    </div>
+  );
+}
+
+export default function ArtWallPostEdit() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ArtWallPostEditContent />
+    </Suspense>
   );
 }
