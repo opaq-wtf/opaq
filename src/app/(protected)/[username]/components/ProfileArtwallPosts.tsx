@@ -91,7 +91,7 @@ export default function ProfileArtwallPosts({ userId, isOwnProfile }: ProfileArt
             } else {
                 params.user_id = userId;
                 // For other users, only show published posts
-                params.status = "Published";
+                params.status = filter === "published" ? "Published" : "Draft";
             }
 
             const response = await axios.get("/api/posts", { params });

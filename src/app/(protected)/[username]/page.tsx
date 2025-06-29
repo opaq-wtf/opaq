@@ -372,11 +372,6 @@ export default function ProfilePage() {
               <BookOpen className="w-5 h-5 mr-2" />
               <div className="flex flex-col items-start">
                 <span>Artwall Posts</span>
-                {profileStats && (
-                  <span className="text-xs opacity-70">
-                    {isOwnProfile ? profileStats.postsCount : profileStats.publishedPostsCount}
-                  </span>
-                )}
               </div>
             </TabsTrigger>
             <TabsTrigger
@@ -386,11 +381,7 @@ export default function ProfilePage() {
               <MessageCircle className="w-5 h-5 mr-2" />
               <div className="flex flex-col items-start">
                 <span>Bloom Pitches</span>
-                {profileStats && (
-                  <span className="text-xs opacity-70">
-                    {isOwnProfile ? profileStats.pitchesCount : profileStats.publicPitchesCount}
-                  </span>
-                )}
+
               </div>
             </TabsTrigger>
             <TabsTrigger
