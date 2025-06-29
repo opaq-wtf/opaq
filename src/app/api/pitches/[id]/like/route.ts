@@ -36,7 +36,16 @@ export async function POST(
             .where(eq(pitches.id, pitchId))
             .limit(1);
 
-        if (!pitchResult[0]) {
+        const pitch = pitchResult[0];
+        if (!pitch) {
+            return NextResponse.json(
+                { message: "Pitch not found" },
+                { status: 404 }
+            );
+        }
+
+        // Check if pitch is private and user is not the owner
+        if (pitch.visibility === "private" && pitch.userId !== userId) {
             return NextResponse.json(
                 { message: "Pitch not found" },
                 { status: 404 }

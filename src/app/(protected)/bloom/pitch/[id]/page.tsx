@@ -157,7 +157,7 @@ export default function PitchDetailPage() {
     } finally {
       setLikingInProgress(false);
     }
-  };  const handlePostToArtWall = () => {
+  }; const handlePostToArtWall = () => {
     if (!pitch) return;
 
     // Create the pitch link
@@ -225,15 +225,17 @@ export default function PitchDetailPage() {
           </Button>
 
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePostToArtWall}
-              className="border-green-600 text-green-300 hover:bg-green-700 hover:text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Post to Art Wall
-            </Button>
+            {pitch.visibility === "public" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePostToArtWall}
+                className="border-green-600 text-green-300 hover:bg-green-700 hover:text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Post to Art Wall
+              </Button>
+            )}
 
             <Button
               variant="outline"
@@ -299,16 +301,14 @@ export default function PitchDetailPage() {
                   size="sm"
                   onClick={handleLike}
                   disabled={likingInProgress}
-                  className={`flex items-center gap-2 px-2 py-1 rounded-lg transition-colors ${
-                    userInteraction?.hasLiked === 1
+                  className={`flex items-center gap-2 px-2 py-1 rounded-lg transition-colors ${userInteraction?.hasLiked === 1
                       ? 'text-rose-400 hover:text-rose-300 bg-rose-900/20 hover:bg-rose-900/30'
                       : 'text-gray-400 hover:text-rose-400 hover:bg-rose-900/20'
-                  }`}
+                    }`}
                 >
                   <Heart
-                    className={`w-5 h-5 ${
-                      userInteraction?.hasLiked === 1 ? 'fill-current text-rose-400' : ''
-                    }`}
+                    className={`w-5 h-5 ${userInteraction?.hasLiked === 1 ? 'fill-current text-rose-400' : ''
+                      }`}
                   />
                   {pitch.likesCount} {pitch.likesCount === 1 ? 'Support' : 'Supports'}
                   {likingInProgress && <Loader2 className="w-3 h-3 animate-spin ml-1" />}

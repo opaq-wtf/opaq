@@ -35,8 +35,18 @@ export async function GET(
             );
         }
 
-        // Handle view tracking
+        // Check if pitch is private and user is not the owner
         const session = await getSession();
+        if (pitch.visibility === "private") {
+            if (!session?.userId || session.userId !== pitch.userId) {
+                return NextResponse.json(
+                    { message: "Pitch not found" },
+                    { status: 404 }
+                );
+            }
+        }
+
+        // Handle view tracking
         if (session?.userId) {
             const userId = session.userId as string;
 
