@@ -41,5 +41,5 @@ export async function GET(req: NextRequest) {
 
   await db.delete(emailVerification).where(eq(emailVerification.userId, id));
 
-  return NextResponse.redirect(new URL("/sign-in", req.url));
+  return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/sign-in`, req.url));
 }
