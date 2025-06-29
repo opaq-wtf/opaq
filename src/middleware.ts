@@ -40,9 +40,10 @@ export async function middleware(req: NextRequest) {
     "/dashboard",
     "/artwall/upload",
     "/artwall",
+    "/manifest"
   ];
 
-  const publicRoutes = ["/", "/about", "/guidelines", "/reach"];
+  const publicRoutes = ["/", "/about", "/guidelines", "/reach", ];
 
   const authRoutes = ["/sign-in", "sign-up", "/forgot-password"];
 
