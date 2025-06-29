@@ -49,7 +49,7 @@ export default function SignUp() {
       }
 
       try {
-        const res = await axios.post("http://localhost:3000/auth/check-user", {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/auth/check-user`, {
           username,
         });
         setIsUsername(res.data.exists);
@@ -63,7 +63,7 @@ export default function SignUp() {
 
   const onSubmit: SubmitHandler<SignUpForm> = async (data: SignUpForm) => {
     try {
-      const res = await axios.post("http://localhost:3000/auth/sign-up", data);
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/auth/sign-up`, data);
       if (res.status === 201) {
         toast.success("Please verify your mail.", {
           description:
