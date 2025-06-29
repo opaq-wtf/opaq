@@ -172,7 +172,7 @@ export function Taskbar() {
                   </svg>
                 </span>
                 <span
-                  className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === "/manifest" ? "sm:w-36" : ""}`}
+                  className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === "/manifest" ? "sm:opacity-100" : ""}`}
                 >
                   Manifest
                 </span>

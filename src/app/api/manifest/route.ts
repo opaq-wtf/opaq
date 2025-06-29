@@ -1,7 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-// @ts-ignore
+import { nanoid } from "nanoid";
 import { getJson } from "serpapi";
+import MongoConnect from "@/lib/mongodb/lib/mongoose";
+import ManifestHistory from "@/lib/mongodb/model/manifest-history";
+import { getSession } from "@/lib/session";
 
 // IMPORTANT: Set your GEMINI_API_KEY in a .env.local file
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -16,6 +19,9 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    // Get user session for history saving
+    const session = await getSession();
 
     // 1. Search the web for context
     const searchResponse = await getJson({
@@ -38,7 +44,28 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(enhancedPrompt);
     const response = result.response;
-    const text = response.text();
+    const text = response.text();    // 3. Save to history if user is authenticated
+    if (session?.userId) {
+      try {
+        await MongoConnect();
+
+        // Generate a short title from the prompt (first 50 characters)
+        const title = prompt.length > 50 ? prompt.substring(0, 50) + "..." : prompt;
+
+        const historyEntry = new ManifestHistory({
+          id: nanoid(),
+          user_id: session.userId,
+          prompt,
+          response: text,
+          title,
+        });
+
+        await historyEntry.save();
+      } catch (historyError) {
+        // Don't fail the main request if history saving fails
+        console.error("Error saving to history:", historyError);
+      }
+    }
 
     return NextResponse.json({ text });
   } catch (error: any) {
