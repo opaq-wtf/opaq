@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,11 +21,14 @@ import axios from 'axios';
 
 export default function ArtWallPostEdit() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editPostId = searchParams.get('edit');
   const editorRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState("");
   const [labels, setLabels] = useState("");
   const [status, setStatus] = useState("Draft");
   const [isLoading, setIsLoading] = useState(false);
+  const [_loadingPost, setLoadingPost] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; content?: string }>(
     {},
   );
@@ -98,7 +101,7 @@ export default function ArtWallPostEdit() {
     setIsLoading(true);
     try {
       const content = getEditorContent();
-      const _response = await axios.post("/api/posts", {
+      const postData = {
         title: title.trim(),
         content,
         labels: labels
@@ -106,15 +109,23 @@ export default function ArtWallPostEdit() {
           .map((label) => label.trim())
           .filter(Boolean),
         status: publish ? "Published" : status,
-      });
+      };
+
+      let _response;
+      if (editPostId) {
+        // Update existing post
+        _response = await axios.put(`/api/posts/${editPostId}`, postData);
+      } else {
+        // Create new post
+        _response = await axios.post("/api/posts", postData);
+      }
 
       // Clear all draft-related data on successful save/publish
       clearAllDraftData();
 
       // Show success message
-      toast.success(
-        publish ? "Post published successfully!" : "Post saved successfully!",
-      );
+      const action = editPostId ? "updated" : (publish ? "published" : "saved");
+      toast.success(`Post ${action} successfully!`);
 
       // Redirect to artwall after a short delay
       setTimeout(() => {
@@ -123,7 +134,8 @@ export default function ArtWallPostEdit() {
     } catch (error: any) {
       console.error("Error saving post:", error);
       const errorMessage = error.response?.data?.message || error.message || "Unknown error";
-      toast.error(`Failed to save post: ${errorMessage}`);
+      const action = editPostId ? "update" : "save";
+      toast.error(`Failed to ${action} post: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -161,6 +173,31 @@ export default function ArtWallPostEdit() {
 
   // Load draft on mount
   useEffect(() => {
+    // First check for URL parameters from pitch
+    const titleParam = searchParams.get('title');
+    const contentParam = searchParams.get('content');
+    const labelsParam = searchParams.get('labels');
+    const sourceParam = searchParams.get('source');
+    const _sourceIdParam = searchParams.get('sourceId');
+
+    // If we have URL parameters, use them
+    if (titleParam || contentParam || labelsParam) {
+      setTitle(titleParam || "");
+      setLabels(labelsParam || "");
+      if (editorRef.current && contentParam) {
+        editorRef.current.innerHTML = contentParam.replace(/\n/g, '<br>');
+        setTimeout(() => checkHasContent(), 100);
+      }
+
+      // If this is from a pitch, show success message
+      if (sourceParam === 'pitch') {
+        toast.success("Pitch data loaded! You can edit and publish to Art Wall.");
+      }
+
+      return; // Don't load draft if we have URL params
+    }
+
+    // Otherwise, check for existing draft
     const draft = localStorage.getItem("draft-post");
     if (draft) {
       try {
@@ -192,7 +229,41 @@ export default function ArtWallPostEdit() {
         clearAllDraftData();
       }
     }
-  }, [clearAllDraftData, checkHasContent]);
+  }, [clearAllDraftData, checkHasContent, searchParams]);
+
+  // Load post data when editing
+  useEffect(() => {
+    if (editPostId) {
+      const loadPostForEdit = async () => {
+        try {
+          setLoadingPost(true);
+          const response = await axios.get(`/api/posts/${editPostId}`);
+          const post = response.data.post;
+
+          setTitle(post.title || "");
+          setLabels(post.labels ? post.labels.join(", ") : "");
+          setStatus(post.status || "Draft");
+
+          if (editorRef.current && post.content) {
+            editorRef.current.innerHTML = post.content;
+            setTimeout(() => checkHasContent(), 100);
+          }
+
+          // Clear any existing draft since we're editing an existing post
+          localStorage.removeItem("draft-post");
+
+        } catch (error) {
+          console.error("Error loading post for edit:", error);
+          toast.error("Failed to load post for editing");
+          router.push("/artwall");
+        } finally {
+          setLoadingPost(false);
+        }
+      };
+
+      loadPostForEdit();
+    }
+  }, [editPostId, checkHasContent, router]);
 
   // Cleanup effect - clear drafts when component unmounts if content was successfully saved
   useEffect(() => {
@@ -651,7 +722,7 @@ export default function ArtWallPostEdit() {
               />
             </svg>
             <span className="font-bold text-xl text-white">Artwall</span>
-            <span className="text-gray-400 text-sm ml-2">/ Create Post</span>
+            <span className="text-gray-400 text-sm ml-2">/ {editPostId ? 'Edit Post' : 'Create Post'}</span>
           </div>
           {isDraftSaved && (
             <div className="flex items-center gap-1 text-green-400 text-sm">

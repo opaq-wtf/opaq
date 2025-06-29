@@ -127,7 +127,7 @@ export function Taskbar() {
             {/* Manifest Button */}
             <div className="relative group">
               <Link
-                href="/manifest"
+                href="#"
                 className={`rounded-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 transition-all ease-in-out flex items-center gap-2 w-12 sm:group-hover:w-36 sm:focus:w-36 overflow-hidden duration-300 ${pathname === "/manifest" ? "sm:w-36" : ""}`}
               >
                 <span className="flex justify-center items-center w-full relative">
@@ -172,7 +172,7 @@ export function Taskbar() {
                   </svg>
                 </span>
                 <span
-                  className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 text-white transition-opacity duration-200 pr-8 ${pathname === "/manifest" ? "sm:opacity-100" : ""}`}
+                  className={`whitespace-nowrap opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 transition-opacity duration-200 pr-8 ${pathname === "/manifest" ? "sm:w-36" : ""}`}
                 >
                   Manifest
                 </span>

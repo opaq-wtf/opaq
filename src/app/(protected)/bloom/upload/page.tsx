@@ -1,8 +1,18 @@
 "use client";
 
-import { useState, useRef, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import { useState, useRef, ChangeEvent, FormEvent, KeyboardEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { WebUploader } from "@irys/web-upload";
+import { WebEthereum } from "@irys/web-upload-ethereum";
+import { ethers } from "ethers";
+
+// Extend Window interface for ethereum
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 import {
   Card,
   CardContent,
@@ -24,8 +34,10 @@ export default function UploadPage() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [aadhar, setAadhar] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [irysUrl, setIrysUrl] = useState<string | null>(null);
+  const [walletConnected, setWalletConnected] = useState(false);
   const [suggestedTags] = useState([
     "Innovation",
     "Technology",
@@ -34,6 +46,48 @@ export default function UploadPage() {
     "Social Impact",
     "Healthcare",
   ]);
+
+  // Check wallet connection on component mount
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
+
+  const checkWalletConnection = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        setWalletConnected(accounts.length > 0);
+      } catch (error) {
+        console.error("Error checking wallet connection:", error);
+      }
+    }
+  };
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask or another Web3 wallet to continue.");
+      return;
+    }
+
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      setWalletConnected(true);
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+      alert("Failed to connect wallet. Please try again.");
+    }
+  };
+
+  const getIrysUploader = async () => {
+    if (!window.ethereum) {
+      throw new Error("MetaMask or another Web3 wallet is required");
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const irysUploader = await WebUploader(WebEthereum).withProvider(provider);
+
+    return irysUploader;
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -83,29 +137,89 @@ export default function UploadPage() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (tags.length === 0) {
       alert("Please add at least one tag.");
       document.getElementById("tags")?.focus();
       return;
     }
+
+    if (!file) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Form submission logic here...
-    console.log({
-      title,
-      description,
-      file,
-      tags,
-      aadhar,
-    });
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // Show success message, maybe with a toast
-      alert("Pitch submitted successfully!");
+    setUploadProgress(0);
+
+    try {
+      // Initialize Irys uploader
+      const irysUploader = await getIrysUploader();
+
+      // Upload file to Irys/Arweave
+      setUploadProgress(25);
+
+      // Get file extension
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+
+      // Create Irys tags including file extension
+      const irysTags = [
+        { name: "Content-Type", value: file.type },
+        { name: "File-Extension", value: fileExtension },
+        { name: "Application", value: "OPAQ-Pitches" },
+        { name: "Title", value: title },
+        ...tags.map(tag => ({ name: "Tag", value: tag }))
+      ];
+
+      console.log("Uploading with Irys tags:", irysTags);
+
+      // Convert File to Buffer for Irys
+      const fileBuffer = await file.arrayBuffer();
+      const receipt = await irysUploader.upload(Buffer.from(fileBuffer), {
+        tags: irysTags
+      });
+
+      setUploadProgress(75);
+
+      const uploadedFileUrl = `https://gateway.irys.xyz/${receipt.id}`;
+      setIrysUrl(uploadedFileUrl);
+      setUploadProgress(100);      // Create pitch data with Irys URL
+      const pitchData = {
+        title,
+        description,
+        fileUrl: uploadedFileUrl,
+        irysId: receipt.id,
+        tags,
+      };
+
+      console.log("Pitch submitted with Irys:", pitchData);
+
+      // Submit pitch data to backend API
+      const response = await fetch('/api/pitches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pitchData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit pitch');
+      }
+
+      alert("Pitch submitted successfully with decentralized storage!");
       router.push("/bloom/my-pitches");
-    }, 2000);
+
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Failed to upload file. Please make sure you have a Web3 wallet connected and try again.");
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -211,7 +325,38 @@ export default function UploadPage() {
             <div className="lg:col-span-1 space-y-6">
               <Card className="bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-white">Categorization & Verification</CardTitle>
+                  <CardTitle className="text-white">Web3 Storage</CardTitle>
+                  <CardDescription>
+                    Connect your wallet to upload files to decentralized storage (Arweave).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!walletConnected ? (
+                    <div className="text-center py-4">
+                      <p className="text-gray-400 mb-4">Wallet connection required for decentralized storage</p>
+                      <Button
+                        type="button"
+                        onClick={connectWallet}
+                        className="bg-orange-600 hover:bg-orange-700"
+                      >
+                        Connect Wallet
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="flex items-center justify-center text-green-400 mb-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                        Wallet Connected
+                      </div>
+                      <p className="text-xs text-gray-500">Ready for decentralized upload</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">Categorization</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
@@ -271,20 +416,6 @@ export default function UploadPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label htmlFor="aadhar" className="text-gray-400 font-medium">Aadhaar Number</label>
-                    <input
-                      id="aadhar"
-                      type="text"
-                      value={aadhar}
-                      onChange={(e) => setAadhar(e.target.value)}
-                      placeholder="XXXX-XXXX-XXXX"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
-                      pattern="\d{4}-\d{4}-\d{4}"
-                      title="Enter a valid 12-digit Aadhaar number in XXXX-XXXX-XXXX format"
-                      required
-                    />
-                  </div>
                 </CardContent>
               </Card>
 
@@ -298,18 +429,34 @@ export default function UploadPage() {
                 <CardFooter>
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
-                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    disabled={isSubmitting || !walletConnected}
                   >
-                    {isSubmitting ? (
+                    {!walletConnected ? (
+                      "Connect Wallet to Submit"
+                    ) : isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Submitting...
+                        {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Connecting..."}
                       </>
                     ) : (
                       "Submit Pitch"
                     )}
                   </Button>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="w-full bg-gray-700 rounded-full h-2 mt-3">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
+                  {irysUrl && (
+                    <div className="mt-3 p-2 bg-green-900/20 border border-green-700 rounded text-green-300 text-sm">
+                      <p className="font-semibold">File uploaded to Arweave!</p>
+                      <p className="text-xs mt-1 break-all">ID: {irysUrl.split('/').pop()}</p>
+                    </div>
+                  )}
                 </CardFooter>
               </Card>
             </div>

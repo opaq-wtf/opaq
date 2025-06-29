@@ -1,4 +1,4 @@
-import { getUser } from "@/app/data/user";
+import { getUser, getUserOptional } from "@/app/data/user";
 import MongoConnect from "@/lib/mongodb/lib/mongoose";
 import posts from "@/lib/mongodb/model/posts";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,10 +12,26 @@ export async function GET(req: NextRequest) {
     await MongoConnect();
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
+    const userOnly = searchParams.get("user_only") === "true";
     const limit = parseInt(searchParams.get("limit") || "10");
     const page = parseInt(searchParams.get("page") || "1");
 
-    const filter = status ? { status } : {};
+    const filter: any = {};
+
+    // Add status filter if provided
+    if (status) {
+      filter.status = status;
+    }
+
+    // Add user filter if user_only is true
+    if (userOnly) {
+      const user = await getUserOptional();
+      if (!user) {
+        return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+      }
+      filter.user_id = user.id;
+    }
+
     const skip = (page - 1) * limit;
 
     const allPosts = await posts
@@ -44,15 +60,15 @@ export async function GET(req: NextRequest) {
             ...post,
             user: user
               ? {
-                  id: user.id,
-                  username: user.username,
-                  full_name: user.fullName,
-                }
+                id: user.id,
+                username: user.username,
+                full_name: user.fullName,
+              }
               : {
-                  id: post.user_id,
-                  username: "unknown_user",
-                  full_name: "Unknown User",
-                },
+                id: post.user_id,
+                username: "unknown_user",
+                full_name: "Unknown User",
+              },
           };
         } catch (error) {
           console.error("Error fetching user for post:", post.id, error);
