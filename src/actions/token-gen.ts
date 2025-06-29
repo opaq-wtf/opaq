@@ -9,7 +9,7 @@ export async function tokenGen(id: string, email: string, full_name: string) {
   const hashedToken = createHash("sha256").update(rawToken).digest("hex");
   const expiresAt = addMinutes(new Date(), 15);
 
-  const verificationLink = `https://opaq.wtf/auth/verify-email?token=${rawToken}&id=${id}`;
+  const verificationLink = `http://localhost:3000/auth/verify-email?token=${rawToken}&id=${id}`;
 
   await db
     .insert(emailVerification)

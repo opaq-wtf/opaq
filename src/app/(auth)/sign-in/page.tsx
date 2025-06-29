@@ -43,7 +43,7 @@ export default function SignIn() {
   const router = useRouter();
   const onSubmit: SubmitHandler<SignInForm> = async (data: SignInForm) => {
     try {
-      const res = await axios.post("https://opaq.wtf/auth/sign-in", data);
+      const res = await axios.post("http://localhost:3000/auth/sign-in", data);
       if (res.status === 200) {
         toast.success(res.data.message, {
           description: "Redirecting you to your profile",
